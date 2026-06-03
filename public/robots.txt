@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Block admin and API routes
+Disallow: /admin/
+Disallow: /api/
+Disallow: /account/
+
+Sitemap: https://uniflexstore.com/sitemap.xml

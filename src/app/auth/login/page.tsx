@@ -15,7 +15,7 @@ export default async function LoginPage({
   return (
     <AuthCard
       title="Welcome back"
-      subtitle="Sign in to your UniFlex Store account"
+      subtitle="Sign in to your UniFlex Global account"
       footer={
         <>
           Don&apos;t have an account?{' '}

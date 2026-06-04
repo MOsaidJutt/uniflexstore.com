@@ -1,4 +1,3 @@
-import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
 interface AuthCardProps {
@@ -9,35 +8,27 @@ interface AuthCardProps {
   className?: string
 }
 
+// The outer card surface is rendered by the auth layout.
+// AuthCard owns only the content structure: heading, body, footer.
 export function AuthCard({ title, subtitle, children, footer, className }: AuthCardProps) {
   return (
-    <div className={cn('w-full max-w-[420px]', className)}>
-      {/* Logo */}
-      <Link href="/" className="mb-8 inline-flex items-baseline gap-1" aria-label="UniFlex Store home">
-        <span className="font-serif text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
-          Uni<span className="text-[var(--brand-accent)]">Flex</span>
-        </span>
-        <span className="text-xs font-medium uppercase tracking-[0.15em] text-[var(--text-muted)]">
-          Store
-        </span>
-      </Link>
-
+    <div className={cn('w-full p-7', className)}>
       {/* Heading */}
-      <h1 className="font-serif text-3xl font-semibold tracking-tight text-[var(--text-primary)]">
+      <h1 className="font-serif text-2xl font-semibold tracking-tight text-[var(--text-primary)]">
         {title}
       </h1>
       {subtitle && (
-        <p className="mt-2 text-sm text-[var(--text-muted)]">{subtitle}</p>
+        <p className="mt-1.5 text-sm text-[var(--text-muted)]">{subtitle}</p>
       )}
 
-      {/* Card body */}
-      <div className="mt-8 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-base)] p-6 shadow-sm">
-        {children}
-      </div>
+      {/* Content */}
+      <div className="mt-7">{children}</div>
 
       {/* Footer */}
       {footer && (
-        <div className="mt-4 text-center text-sm text-[var(--text-muted)]">{footer}</div>
+        <div className="mt-6 border-t border-[var(--border-subtle)] pt-5 text-center text-sm text-[var(--text-muted)]">
+          {footer}
+        </div>
       )}
     </div>
   )
@@ -66,14 +57,14 @@ export function FieldError({ id, message }: { id?: string; message?: string }) {
   )
 }
 
-// ─── Form-level alert — uses design tokens for both light and dark ─────────────
+// ─── Form-level alert ─────────────────────────────────────────────────────────
 
 export function FormAlert({ error, success }: { error?: string; success?: string }) {
   if (!error && !success) return null
   return (
     <div
       role="alert"
-      className="rounded-md px-4 py-3 text-sm"
+      className="mb-5 rounded-xl px-4 py-3 text-sm"
       style={
         error
           ? {

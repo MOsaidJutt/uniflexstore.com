@@ -44,3 +44,9 @@ export async function checkRegisterRate(): Promise<boolean> {
   const ip = await getIp()
   return check(`register:${ip}`, 10, 60 * 60 * 1000)
 }
+
+/** 60 search suggestion requests per minute per IP */
+export async function checkSearchRate(): Promise<boolean> {
+  const ip = await getIp()
+  return check(`search:${ip}`, 60, 60 * 1000)
+}

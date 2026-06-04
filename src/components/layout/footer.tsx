@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { siteConfig } from '@/config/site'
 import { NewsletterForm } from '@/components/shared/newsletter-form'
 
@@ -100,15 +101,15 @@ export function Footer() {
 
           {/* Brand column */}
           <div className="col-span-2 sm:col-span-4 lg:col-span-1">
-            <Link href="/" aria-label="UniFlex Store home">
-              <span className="font-serif text-xl font-700 text-[var(--text-primary)]">
-                Uni<span className="text-[var(--brand-accent)]">Flex</span>
-                <span
-                  aria-hidden="true"
-                  className="ml-1 text-xs font-400 uppercase tracking-widest text-[var(--text-muted)]"
-                >
-                  Store
-                </span>
+            <Link href="/" aria-label="UniFlex Global home">
+              <span className="inline-flex h-10 items-center rounded-xl bg-white px-2 shadow-sm transition-opacity hover:opacity-90">
+                <Image
+                  src="/logo.png"
+                  alt="UniFlex Global"
+                  width={110}
+                  height={34}
+                  className="h-8 w-auto object-contain"
+                />
               </span>
             </Link>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-[var(--text-muted)]">

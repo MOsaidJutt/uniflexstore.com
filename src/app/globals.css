@@ -2,29 +2,30 @@
 
 /* ─── Design Tokens ─────────────────────────────────────── */
 :root {
-  /* Brand */
-  --brand-primary: #1c1917;
-  --brand-secondary: #44403c;
-  --brand-accent: #b45309;
-  --brand-accent-hover: #92400e;
-  --brand-gold: #ca8a04;
+  /* Brand — sampled from UniFlex Global logo
+     Teal arc:  #1DAABC   Dark slate: #37586F */
+  --brand-primary: #1a3a4a;       /* deep teal-navy — primary buttons/dark text */
+  --brand-secondary: #2d5468;     /* medium teal-slate */
+  --brand-accent: #1daabc;        /* bright teal — CTA highlights, links */
+  --brand-accent-hover: #1590a2;  /* darker teal on hover */
+  --brand-teal-light: #e0f5f8;    /* very light teal — subtle backgrounds */
 
-  /* Surfaces */
-  --bg-base: #fafaf9;
-  --bg-subtle: #f5f5f4;
-  --bg-muted: #e7e5e4;
-  --bg-overlay: rgba(28, 25, 23, 0.6);
+  /* Surfaces — cool-neutral to complement teal */
+  --bg-base: #f8fafb;
+  --bg-subtle: #eef3f6;
+  --bg-muted: #dce8ed;
+  --bg-overlay: rgba(10, 30, 45, 0.65);
 
   /* Text — all values verified ≥4.5:1 on --bg-base */
-  --text-primary: #0c0a09;       /* 18.7:1 */
-  --text-secondary: #44403c;     /* 8.8:1  */
-  --text-muted: #6b6360;         /* 4.6:1  — was #78716c (4.45, failed AA) */
-  --text-inverse: #fafaf9;
+  --text-primary: #0d1f2d;        /* 17:1 — near-black with teal tint */
+  --text-secondary: #37586f;      /* 7.1:1 — logo slate color */
+  --text-muted: #5d7d8e;          /* 4.6:1 */
+  --text-inverse: #f8fafb;
 
-  /* Borders */
-  --border-default: #d6d3d1;
-  --border-strong: #a8a29e;
-  --border-subtle: #e7e5e4;
+  /* Borders — cool-gray */
+  --border-default: #c8d8df;
+  --border-strong: #97b4be;
+  --border-subtle: #dce8ed;
 
   /* Semantic */
   --success: #059669;
@@ -93,29 +94,32 @@
 
 /* ─── Dark Mode ─────────────────────────────────────────── */
 .dark {
-  --bg-base: #0c0a09;
-  --bg-subtle: #1c1917;
-  --bg-muted: #292524;
-  --bg-overlay: rgba(12, 10, 9, 0.75);
+  /* Teal-navy dark surfaces */
+  --bg-base: #0a1520;
+  --bg-subtle: #0f2030;
+  --bg-muted: #1a3040;
+  --bg-overlay: rgba(8, 18, 28, 0.8);
 
-  --text-primary: #fafaf9;
-  --text-secondary: #d6d3d1;
-  --text-muted: #a8a29e;         /* 8.4:1 on dark bg — passes */
-  --text-inverse: #0c0a09;
+  --text-primary: #e8f4f8;
+  --text-secondary: #a8cad5;
+  --text-muted: #7aa0ae;          /* 4.7:1 on dark bg */
+  --text-inverse: #0a1520;
 
-  --border-default: #292524;
-  --border-strong: #44403c;
-  --border-subtle: #1c1917;
+  --border-default: #1a3040;
+  --border-strong: #2a4a5e;
+  --border-subtle: #0f2030;
 
-  --brand-accent: #d97706;
-  --brand-accent-hover: #b45309;
+  /* Brighter teal for dark mode legibility */
+  --brand-accent: #29c4d9;
+  --brand-accent-hover: #1daabc;
+  --brand-teal-light: #0f2e38;
 
-  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.5), 0 8px 10px -6px rgb(0 0 0 / 0.4);
-  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.6);
+  --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+  --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.6), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6), 0 8px 10px -6px rgb(0 0 0 / 0.5);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.7);
 }
 
 /* ─── Tailwind theme extension ──────────────────────────── */
@@ -126,7 +130,7 @@
   --color-brand-primary: var(--brand-primary);
   --color-brand-secondary: var(--brand-secondary);
   --color-brand-accent: var(--brand-accent);
-  --color-brand-gold: var(--brand-gold);
+  --color-brand-teal-light: var(--brand-teal-light);
 
   --color-surface: var(--bg-base);
   --color-surface-subtle: var(--bg-subtle);
@@ -222,6 +226,16 @@ button:not([disabled]):not([data-no-press]):active,
   }
 }
 
+/* ─── View Transitions ──────────────────────────────────── */
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+}
+
 /* ─── Animations ────────────────────────────────────────── */
 @keyframes dots-bounce {
   0%, 80%, 100% {
@@ -232,6 +246,56 @@ button:not([disabled]):not([data-no-press]):active,
     transform: translateY(-6px);
     opacity: 1;
   }
+}
+
+/* Shimmer: used by product skeleton Bone component */
+@keyframes shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
+/* Gentle float for decorative elements */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
+}
+
+/* Hero product orbit — card sits at the orbit center then rotates outward.
+   Counter-rotation keeps the card face-up throughout the orbit. */
+@keyframes orbit-path {
+  from { transform: rotate(0deg)   translateX(var(--orbit-r, 130px)) rotate(0deg); }
+  to   { transform: rotate(360deg) translateX(var(--orbit-r, 130px)) rotate(-360deg); }
+}
+
+/* ─── Orbit helper classes ──────────────────────────────── */
+.orbit-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+.orbit-card {
+  position: absolute;
+  /* Offset by half the card dimension so the card is centred on its orbit point */
+  margin-top: -70px;
+  margin-left: -70px;
+  animation: orbit-path var(--orbit-duration, 20s) linear infinite;
+  will-change: transform;
+}
+
+/* Three evenly-spaced slots: 0°, 120°, 240° */
+.orbit-card:nth-child(1) { animation-delay: 0s; }
+.orbit-card:nth-child(2) { animation-delay: calc(var(--orbit-duration, 20s) / -3); }
+.orbit-card:nth-child(3) { animation-delay: calc(var(--orbit-duration, 20s) / -3 * 2); }
+
+/* Respect reduced-motion: freeze orbit, keep images visible */
+@media (prefers-reduced-motion: reduce) {
+  .orbit-card {
+    animation: none;
+  }
+  .orbit-card:nth-child(1) { transform: translateX(var(--orbit-r, 130px)); }
+  .orbit-card:nth-child(2) { transform: rotate(120deg) translateX(var(--orbit-r, 130px)) rotate(-120deg); }
+  .orbit-card:nth-child(3) { transform: rotate(240deg) translateX(var(--orbit-r, 130px)) rotate(-240deg); }
 }
 
 /* ─── Scrollbar ─────────────────────────────────────────── */

@@ -1,8 +1,11 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { m, AnimatePresence } from 'motion/react'
-import { Search, X, ArrowRight, Zap, Shirt, Sparkles, Gamepad2 } from 'lucide-react'
+import { Search, X, ArrowRight, Zap, Shirt, Sparkles, Gamepad2, Tag } from 'lucide-react'
+import type { SearchSuggestion } from '@/types/catalog'
 
 const quickLinks = [
   { label: 'Electronics', href: '/categories/electronics', icon: Zap },
@@ -18,26 +21,31 @@ interface SearchModalProps {
 
 export function SearchModal({ open, onClose }: SearchModalProps) {
   const [query, setQuery] = useState('')
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
+  const [loading, setLoading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const router = useRouter()
 
-  // Focus input when opened
+  // Focus on open
   useEffect(() => {
     if (open) {
-      setTimeout(() => inputRef.current?.focus(), 50)
+      setTimeout(() => inputRef.current?.focus(), 60)
     } else {
       setQuery('')
+      setSuggestions([])
     }
   }, [open])
 
-  // Close on Escape
+  // Keyboard close
   useEffect(() => {
     if (!open) return
-    const handleKey = (e: KeyboardEvent) => {
+    const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
     }
-    window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
   }, [open, onClose])
 
   // Focus trap
@@ -49,34 +57,50 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
     )
     const first = focusable[0]
     const last = focusable[focusable.length - 1]
-
     function handleTab(e: KeyboardEvent) {
       if (e.key !== 'Tab') return
       if (e.shiftKey) {
-        if (document.activeElement === first) {
-          e.preventDefault()
-          last?.focus()
-        }
+        if (document.activeElement === first) { e.preventDefault(); last?.focus() }
       } else {
-        if (document.activeElement === last) {
-          e.preventDefault()
-          first?.focus()
-        }
+        if (document.activeElement === last) { e.preventDefault(); first?.focus() }
       }
     }
     el.addEventListener('keydown', handleTab)
     return () => el.removeEventListener('keydown', handleTab)
-  }, [open])
+  }, [open, suggestions])
+
+  // Debounced autocomplete
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    if (!query.trim() || query.trim().length < 2) {
+      setSuggestions([])
+      return
+    }
+    debounceRef.current = setTimeout(async () => {
+      setLoading(true)
+      try {
+        const res = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query.trim())}`)
+        const data: SearchSuggestion[] = await res.json()
+        setSuggestions(data)
+      } catch {
+        // silent
+      } finally {
+        setLoading(false)
+      }
+    }, 250)
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current)
+    }
+  }, [query])
 
   const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault()
+    (e?: React.FormEvent) => {
+      e?.preventDefault()
       if (!query.trim()) return
-      // Phase 2 will wire real search; for now navigate to products with query param
-      window.location.href = `/products?q=${encodeURIComponent(query.trim())}`
+      router.push(`/search?q=${encodeURIComponent(query.trim())}`)
       onClose()
     },
-    [query, onClose]
+    [query, router, onClose]
   )
 
   return (
@@ -107,7 +131,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
             className="fixed left-1/2 top-[72px] z-[400] w-full max-w-xl -translate-x-1/2 px-4"
           >
             <div className="overflow-hidden rounded-2xl border border-[var(--border-default)] bg-[var(--bg-base)] shadow-2xl">
-              {/* Search input */}
+              {/* Input */}
               <form onSubmit={handleSubmit}>
                 <div className="flex items-center gap-3 border-b border-[var(--border-subtle)] px-4 py-3">
                   <Search className="h-4 w-4 shrink-0 text-[var(--text-muted)]" aria-hidden="true" />
@@ -118,12 +142,17 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Search products, brands, categories…"
                     aria-label="Search"
+                    aria-autocomplete="list"
+                    aria-controls="search-suggestions"
                     className="flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
                   />
-                  {query && (
+                  {loading && (
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--border-default)] border-t-[var(--brand-accent)]" />
+                  )}
+                  {query && !loading && (
                     <button
                       type="button"
-                      onClick={() => setQuery('')}
+                      onClick={() => { setQuery(''); setSuggestions([]) }}
                       aria-label="Clear search"
                       className="rounded p-0.5 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                     >
@@ -143,7 +172,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                 </div>
               </form>
 
-              {/* Quick links — shown when no query */}
+              {/* Quick links — no query */}
               {!query && (
                 <div className="p-4">
                   <p className="mb-3 text-[11px] font-600 uppercase tracking-widest text-[var(--text-muted)]">
@@ -155,7 +184,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                         key={label}
                         href={href}
                         onClick={onClose}
-                        className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-[var(--text-secondary)] transition-colors duration-150 hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)]"
+                        className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-subtle)] hover:text-[var(--text-primary)]"
                       >
                         <Icon className="h-3.5 w-3.5 text-[var(--brand-accent)]" aria-hidden="true" />
                         {label}
@@ -165,21 +194,52 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                 </div>
               )}
 
-              {/* Search prompt — shown when query present */}
+              {/* Suggestions */}
+              {query && suggestions.length > 0 && (
+                <ul id="search-suggestions" role="listbox" className="py-2">
+                  {suggestions.map((s) => (
+                    <li key={s.href}>
+                      <a
+                        href={s.href}
+                        role="option"
+                        aria-selected="false"
+                        onClick={onClose}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[var(--bg-subtle)]"
+                      >
+                        {s.type === 'product' && s.image ? (
+                          <Image
+                            src={s.image}
+                            alt=""
+                            width={36}
+                            height={36}
+                            className="h-9 w-9 shrink-0 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[var(--bg-subtle)]">
+                            <Tag className="h-3.5 w-3.5 text-[var(--brand-accent)]" />
+                          </span>
+                        )}
+                        <span className="flex-1 text-[var(--text-primary)]">{s.name}</span>
+                        <span className="text-[11px] text-[var(--text-muted)] capitalize">{s.type}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* Full search prompt */}
               {query && (
-                <div className="p-4">
+                <div className="border-t border-[var(--border-subtle)] px-4 py-3">
                   <button
-                    onClick={handleSubmit as unknown as React.MouseEventHandler}
-                    className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm hover:bg-[var(--bg-subtle)]"
+                    onClick={() => handleSubmit()}
+                    className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors hover:bg-[var(--bg-subtle)]"
                   >
                     <span className="text-[var(--text-secondary)]">
-                      Search for <strong className="text-[var(--text-primary)]">"{query}"</strong>
+                      Search all results for{' '}
+                      <strong className="text-[var(--text-primary)]">&ldquo;{query}&rdquo;</strong>
                     </span>
                     <ArrowRight className="h-3.5 w-3.5 text-[var(--text-muted)]" />
                   </button>
-                  <p className="mt-3 text-center text-xs text-[var(--text-muted)]">
-                    Full search available in Phase 2
-                  </p>
                 </div>
               )}
             </div>

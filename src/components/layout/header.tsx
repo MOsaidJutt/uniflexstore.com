@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { m, AnimatePresence } from 'motion/react'
 import {
   Search,
@@ -163,10 +164,10 @@ export function Header({ userButton }: { userButton?: React.ReactNode }) {
     <>
       <header
         className={cn(
-          'sticky top-0 z-[200] w-full transition-all duration-300',
+          'sticky top-0 z-[200] w-full transition-all duration-500',
           scrolled
-            ? 'border-b border-[var(--border-subtle)] bg-[var(--bg-base)]/90 backdrop-blur-xl shadow-sm'
-            : 'bg-[var(--bg-base)]'
+            ? 'border-b border-[var(--border-subtle)] bg-[var(--bg-base)]/80 shadow-[0_1px_20px_-4px_rgba(29,170,188,0.08)] backdrop-blur-2xl'
+            : 'bg-[var(--bg-base)]/0 backdrop-blur-none'
         )}
       >
         <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-6 px-4 sm:px-6 lg:px-8">
@@ -174,17 +175,19 @@ export function Header({ userButton }: { userButton?: React.ReactNode }) {
           {/* Logo */}
           <Link
             href="/"
-            className="flex shrink-0 items-baseline gap-1"
-            aria-label="UniFlex Store — Home"
+            className="shrink-0"
+            aria-label="UniFlex Global — Home"
           >
-            <span className="font-serif text-xl font-700 tracking-tight text-[var(--text-primary)]">
-              Uni<span className="text-[var(--brand-accent)]">Flex</span>
-            </span>
-            <span
-              aria-hidden="true"
-              className="hidden text-[10px] font-500 uppercase tracking-[0.15em] text-[var(--text-muted)] sm:inline"
-            >
-              Store
+            {/* White pill keeps the PNG legible on both light and dark backgrounds */}
+            <span className="flex h-10 items-center rounded-xl bg-white px-2 shadow-sm transition-opacity duration-150 hover:opacity-90">
+              <Image
+                src="/logo.png"
+                alt="UniFlex Global"
+                width={120}
+                height={36}
+                priority
+                className="h-8 w-auto object-contain"
+              />
             </span>
           </Link>
 
@@ -227,7 +230,7 @@ export function Header({ userButton }: { userButton?: React.ReactNode }) {
               <li>
                 <Link
                   href="/deals"
-                  className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-500 text-[var(--brand-accent)] transition-colors duration-150 hover:text-[var(--brand-accent-hover)]"
+                  className="flex items-center gap-1.5 rounded-md px-3 py-2 text-sm font-600 text-[var(--brand-accent)] transition-colors duration-150 hover:text-[var(--brand-accent-hover)]"
                 >
                   <Zap className="h-3.5 w-3.5" aria-hidden="true" />
                   Deals
@@ -335,7 +338,7 @@ export function Header({ userButton }: { userButton?: React.ReactNode }) {
                     {activeData.subcategories.map((sub) => (
                       <m.li key={sub.slug} variants={staggerItem}>
                         <Link
-                          href={`/categories/${activeData.slug}/${sub.slug}`}
+                          href={`/categories/${sub.slug}`}
                           className="group flex items-center gap-2 text-sm text-[var(--text-secondary)] transition-colors duration-150 hover:text-[var(--text-primary)]"
                           onClick={() => setActiveCategory(null)}
                         >
@@ -387,8 +390,14 @@ export function Header({ userButton }: { userButton?: React.ReactNode }) {
               className="fixed inset-y-0 right-0 z-[400] w-full max-w-sm overflow-y-auto bg-[var(--bg-base)] shadow-2xl lg:hidden"
             >
               <div className="flex h-16 items-center justify-between px-5">
-                <span className="font-serif text-lg font-600" aria-hidden="true">
-                  Menu
+                <span className="flex h-9 items-center rounded-lg bg-white px-1.5">
+                  <Image
+                    src="/logo.png"
+                    alt="UniFlex Global"
+                    width={90}
+                    height={28}
+                    className="h-7 w-auto object-contain"
+                  />
                 </span>
                 <button
                   onClick={() => setMobileOpen(false)}
@@ -422,7 +431,7 @@ export function Header({ userButton }: { userButton?: React.ReactNode }) {
                           {cat.subcategories.map((sub) => (
                             <li key={sub.slug}>
                               <Link
-                                href={`/categories/${cat.slug}/${sub.slug}`}
+                                href={`/categories/${sub.slug}`}
                                 onClick={() => setMobileOpen(false)}
                                 className="text-sm text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                               >

@@ -1,5 +1,5 @@
 export const siteConfig = {
-  name: 'UniFlex Store',
+  name: 'UniFlex Global',
   description:
     'Premium multi-category US e-commerce — Electronics, Fashion, Beauty, Toys and more.',
   url: process.env.NEXT_PUBLIC_APP_URL ?? 'https://uniflexstore.com',

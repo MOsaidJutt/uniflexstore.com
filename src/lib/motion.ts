@@ -214,3 +214,31 @@ export const cardReveal: Variants = {
     transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
   },
 }
+
+// ─── Cart Drawer ──────────────────────────────────────────────────────────────
+
+export const cartDrawer: Variants = {
+  hidden: { x: '100%' },
+  visible: {
+    x: 0,
+    transition: { type: 'spring', stiffness: 320, damping: 32 },
+  },
+  exit: {
+    x: '100%',
+    transition: { duration: 0.28, ease: [0.4, 0, 1, 1] },
+  },
+}
+
+// ─── Checkout step transition ─────────────────────────────────────────────────
+
+export const stepForward: Variants = {
+  hidden: { opacity: 0, x: 40 },
+  visible: { opacity: 1, x: 0, transition: easeSmooth },
+  exit: { opacity: 0, x: -20, transition: easeNormal },
+}
+
+export const stepBackward: Variants = {
+  hidden: { opacity: 0, x: -40 },
+  visible: { opacity: 1, x: 0, transition: easeSmooth },
+  exit: { opacity: 0, x: 20, transition: easeNormal },
+}

@@ -10,6 +10,8 @@ import { WishlistButton } from '@/components/catalog/wishlist-button'
 interface PDPActionsProps {
   productId: string
   slug: string
+  name: string
+  image: string
   basePrice: number
   compareAt: number | null
   stock: number
@@ -18,6 +20,9 @@ interface PDPActionsProps {
 
 export function PDPActions({
   productId,
+  slug,
+  name,
+  image,
   basePrice,
   compareAt,
   stock,
@@ -26,6 +31,8 @@ export function PDPActions({
   const [variantPrice, setVariantPrice] = useState<number | null>(null)
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(null)
   const [variantStock, setVariantStock] = useState<number | null>(null)
+  const [selectedVariantName, setSelectedVariantName] = useState<string | null>(null)
+  const [selectedVariantValue, setSelectedVariantValue] = useState<string | null>(null)
 
   const displayPrice = variantPrice ?? basePrice
   const discount = compareAt ? Math.round((1 - displayPrice / compareAt) * 100) : null
@@ -40,9 +47,10 @@ export function PDPActions({
   ) {
     setSelectedVariantId(varId)
     setVariantPrice(price)
-    // Look up the selected variant's stock from the variants array
     const variant = varId ? variants.find((v) => v.id === varId) : null
     setVariantStock(variant?.stock ?? null)
+    setSelectedVariantName(variant?.name ?? null)
+    setSelectedVariantValue(variant?.value ?? null)
   }
 
   function handleShare() {
@@ -100,6 +108,13 @@ export function PDPActions({
           stock={effectiveStock}
           size="lg"
           className="flex-1"
+          name={name}
+          slug={slug}
+          image={image}
+          price={variantPrice ?? basePrice}
+          compareAt={compareAt}
+          variantName={selectedVariantName}
+          variantValue={selectedVariantValue}
         />
         <WishlistButton productId={productId} size="md" />
         <button

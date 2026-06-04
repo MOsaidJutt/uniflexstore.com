@@ -180,6 +180,11 @@ export function QuickViewModal({ product, onClose }: QuickViewModalProps) {
                       stock={product.stock}
                       size="md"
                       className="flex-1"
+                      name={product.name}
+                      slug={product.slug}
+                      image={product.images[0]?.url ?? ''}
+                      price={product.price}
+                      compareAt={product.compareAt}
                     />
                     <WishlistButton productId={product.id} />
                   </div>

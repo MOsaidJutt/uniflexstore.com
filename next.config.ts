@@ -30,12 +30,13 @@ const nextConfig: NextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://js.stripe.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              // OAuth avatar hostnames added to img-src
-              "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://platform-lookaside.fbsbx.com",
-              "connect-src 'self'",
+              // OAuth avatar hostnames + Stripe receipt images
+              "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://platform-lookaside.fbsbx.com https://q.stripe.com",
+              "connect-src 'self' https://api.stripe.com",
+              "frame-src https://js.stripe.com https://hooks.stripe.com",
               "frame-ancestors 'none'",
             ].join('; '),
           },

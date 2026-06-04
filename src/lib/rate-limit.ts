@@ -50,3 +50,9 @@ export async function checkSearchRate(): Promise<boolean> {
   const ip = await getIp()
   return check(`search:${ip}`, 60, 60 * 1000)
 }
+
+/** 20 coupon validation attempts per 5 minutes per IP */
+export async function checkCouponRate(): Promise<boolean> {
+  const ip = await getIp()
+  return check(`coupon:${ip}`, 20, 5 * 60 * 1000)
+}

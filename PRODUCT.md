@@ -19,19 +19,30 @@ The design bar is a "million-dollar retail flagship" — the layout precision of
 
 ## Brand
 
-- **Logotype:** "UniFlex Store" — Playfair Display italic for "Uni", then "Flex" in amber accent.
-- **Feeling:** Premium but approachable. Warm neutrals, not cold grays. Trust-first, not hype-first.
+- **Logotype:** PNG at `/public/logo.png` — white pill container on all backgrounds.
+- **Palette:** Deep teal-navy primary, bright teal accent. Cool-neutral surfaces with teal tint.
+- **Feeling:** Premium but approachable. Cool-teal precision, not cold grays. Trust-first, not hype-first.
 - **Voice:** Direct, specific, confident. No marketing buzzwords (no "curated", "seamless", "world-class").
 
 ## Palette
 
 | Token | Light | Dark | Use |
 |-------|-------|------|-----|
-| `--brand-primary` | `#1c1917` | `#1c1917` | Logo, footer bg, primary buttons |
-| `--brand-accent` | `#b45309` | `#d97706` | CTAs, links, active states, price highlights |
-| `--bg-base` | `#fafaf9` | `#0c0a09` | Page background |
-| `--text-primary` | `#0c0a09` | `#fafaf9` | Headings, body |
-| `--text-muted` | `#6b6360` | `#a8a29e` | Captions (all ≥4.5:1 verified) |
+| `--brand-primary` | `#1a3a4a` | `#1a3a4a` | Primary buttons, logo area, footer bg |
+| `--brand-secondary` | `#2d5468` | `#2d5468` | Hover state for primary buttons |
+| `--brand-accent` | `#1daabc` | `#29c4d9` | CTAs, links, active states, badges |
+| `--brand-accent-hover` | `#1590a2` | `#1daabc` | Hover state for accent |
+| `--brand-teal-light` | `#e0f5f8` | `#0f2e38` | Subtle teal backgrounds (selected states, banners) |
+| `--bg-base` | `#f8fafb` | `#0a1520` | Page background |
+| `--bg-subtle` | `#eef3f6` | `#0f2030` | Card backgrounds, form inputs |
+| `--bg-muted` | `#dce8ed` | `#1a3040` | Disabled states, progress bars |
+| `--text-primary` | `#0d1f2d` | `#e8f4f8` | Headings, body (17:1 on bg-base) |
+| `--text-secondary` | `#37586f` | `#a8cad5` | Supporting text (7.1:1) |
+| `--text-muted` | `#5d7d8e` | `#7aa0ae` | Captions (4.6:1 verified) |
+| `--border-subtle` | `#dce8ed` | `#0f2030` | Dividers, card borders |
+| `--border-default` | `#c8d8df` | `#1a3040` | Input borders |
+| `--success` | `#059669` | `#059669` | Success states |
+| `--error` | `#dc2626` | `#dc2626` | Error states |
 
 ## Typography
 
@@ -50,9 +61,9 @@ The design bar is a "million-dollar retail flagship" — the layout precision of
 | Phase | Status | Surfaces |
 |-------|--------|---------|
 | 0 — Foundation | ✅ Done | Shell, header, footer, design tokens, Prisma schema |
-| 1 — Auth | Pending | Login, register, OAuth, password reset |
-| 2 — Catalog | Pending | Homepage hero, PLP, PDP, search |
-| 3 — Cart + Checkout | Pending | Cart drawer, Stripe checkout |
+| 1 — Auth | ✅ Done | Login, register, OAuth, password reset, account page |
+| 2 — Catalog | ✅ Done | Homepage hero, PLP, PDP, search, filters, quick view |
+| 3 — Cart + Checkout | ✅ Done | Cart drawer, address/shipping/payment steps, Stripe Payment Element, webhook, order confirmation |
 | 4 — Orders | Pending | Order history, detail, tracking |
 | 5 — Admin | Pending | /admin/* surfaces |
 | 6 — Chatbot | Pending | Floating Claude-powered widget |

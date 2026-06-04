@@ -167,6 +167,8 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
           <PDPActions
             productId={product.id}
             slug={product.slug}
+            name={product.name}
+            image={product.images[0]?.url ?? ''}
             basePrice={product.price}
             compareAt={product.compareAt}
             stock={product.stock}

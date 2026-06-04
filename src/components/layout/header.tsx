@@ -23,6 +23,7 @@ import { categories } from '@/config/site'
 import { cn } from '@/lib/utils'
 import { megaMenuPanel, mobileMenuDrawer, staggerContainer, staggerItem } from '@/lib/motion'
 import { SearchModal } from '@/components/shared/search-modal'
+import { useCart } from '@/hooks/use-cart'
 
 const categoryIcons = {
   electronics: Zap,
@@ -108,8 +109,8 @@ export function Header({ userButton }: { userButton?: React.ReactNode }) {
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
 
-  // Cart count — placeholder until Phase 3
-  const cartCount = 0
+  const { itemCount, openCart } = useCart()
+  const cartCount = itemCount
 
   // Scroll shadow
   useEffect(() => {
@@ -262,21 +263,25 @@ export function Header({ userButton }: { userButton?: React.ReactNode }) {
               </Link>
             )}
 
-            <Link
-              href="/cart"
-              aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : 'Cart, empty'}
+            <button
+              onClick={openCart}
+              aria-label={cartCount > 0 ? `Open cart, ${cartCount} items` : 'Open cart'}
               className="relative flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[var(--bg-subtle)]"
             >
               <ShoppingBag className="h-4 w-4" aria-hidden="true" />
               {cartCount > 0 && (
-                <span
+                <m.span
+                  key={cartCount}
+                  initial={{ scale: 0.6, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                   aria-hidden="true"
                   className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--brand-accent)] text-[9px] font-600 text-white"
                 >
-                  {cartCount}
-                </span>
+                  {cartCount > 9 ? '9+' : cartCount}
+                </m.span>
               )}
-            </Link>
+            </button>
 
             {/* Mobile menu trigger */}
             <button

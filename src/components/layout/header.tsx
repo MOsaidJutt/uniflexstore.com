@@ -99,7 +99,7 @@ function useFocusTrap(active: boolean, ref: React.RefObject<HTMLElement | null>)
 
 // ─── Header ──────────────────────────────────────────────────────────────────
 
-export function Header() {
+export function Header({ userButton }: { userButton?: React.ReactNode }) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -249,13 +249,15 @@ export function Header() {
 
             <ThemeToggle />
 
-            <Link
-              href="/account"
-              aria-label="My account"
-              className="hidden h-9 w-9 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[var(--bg-subtle)] sm:flex"
-            >
-              <User className="h-4 w-4" aria-hidden="true" />
-            </Link>
+            {userButton ?? (
+              <Link
+                href="/auth/login"
+                aria-label="Sign in"
+                className="hidden h-9 w-9 items-center justify-center rounded-full transition-colors duration-150 hover:bg-[var(--bg-subtle)] sm:flex"
+              >
+                <User className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            )}
 
             <Link
               href="/cart"

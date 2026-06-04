@@ -2,8 +2,6 @@ import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import { ThemeProvider } from '@/components/shared/theme-provider'
 import { MotionProvider } from '@/components/shared/motion-provider'
-import { Header } from '@/components/layout/header'
-import { Footer } from '@/components/layout/footer'
 import { siteConfig } from '@/config/site'
 import './globals.css'
 
@@ -78,9 +76,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           disableTransitionOnChange={false}
         >
           <MotionProvider>
-            <Header />
-            <main className="flex-1">{children}</main>
-            <Footer />
+            {children}
           </MotionProvider>
         </ThemeProvider>
       </body>

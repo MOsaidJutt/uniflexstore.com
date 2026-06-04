@@ -1,17 +1,11 @@
 import Link from 'next/link'
 import { ArrowRight, Zap, Shirt, Sparkles, Gamepad2 } from 'lucide-react'
 
-// CSS-variable-based category colors — respond to dark mode via .dark class
 const heroCats = [
   {
     name: 'Electronics',
     slug: 'electronics',
     icon: Zap,
-    // Deep blue tint in light, cooler dark in dark
-    style: {
-      light: { bg: '#eff6ff', border: '#bfdbfe', icon: '#3b82f6' },
-      dark: { bg: '#1e2a3a', border: '#1d4ed8', icon: '#60a5fa' },
-    },
     twBg: 'bg-blue-50 dark:bg-[#1e2a3a] border border-blue-100 dark:border-blue-900',
     iconColor: 'text-blue-500 dark:text-blue-400',
   },
@@ -46,14 +40,13 @@ export default function HomePage() {
         <div className="mx-auto w-full max-w-[1440px] px-4 py-20 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <p className="text-xs font-medium uppercase tracking-[0.2em] text-[var(--brand-accent)]">
-              New Season — Summer 2025
+              New Season — Summer 2026
             </p>
             <h1 className="mt-3 font-serif text-5xl font-semibold text-[var(--text-primary)] sm:text-6xl lg:text-7xl">
               Shop the <em className="not-italic text-[var(--brand-accent)]">best</em> of everything
             </h1>
             <p className="mt-5 max-w-lg text-lg text-[var(--text-muted)]">
-              Electronics, fashion, beauty, toys and more — selected for quality,
-              shipped fast across the US.
+              Electronics, fashion, beauty, toys and more — selected for quality, shipped fast across the US.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
@@ -107,19 +100,6 @@ export default function HomePage() {
           ))}
         </ul>
       </section>
-
-      {/* Phase 0 completion notice — remove when Phase 1 ships */}
-      <div className="mx-auto mb-16 max-w-[1440px] px-4 sm:px-6 lg:px-8">
-        <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)] p-8 text-center">
-          <p className="font-serif text-xl font-semibold text-[var(--text-primary)]">
-            Phase 0 — Foundation
-          </p>
-          <p className="mt-2 text-sm text-[var(--text-muted)]">
-            Design system · Header + mega-menu · Footer · Theme toggle · Motion layer ·
-            Prisma schema · Loading state · 404
-          </p>
-        </div>
-      </div>
     </div>
   )
 }

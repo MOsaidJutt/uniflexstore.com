@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, type ReactNode } from 'react'
+import { usePathname } from 'next/navigation'
 import { LazyMotion, domAnimation, MotionConfig } from 'motion/react'
 import Lenis from 'lenis'
 
@@ -10,6 +11,7 @@ interface MotionProviderProps {
 
 export function MotionProvider({ children }: MotionProviderProps) {
   const lenisRef = useRef<Lenis | null>(null)
+  const pathname = usePathname()
 
   useEffect(() => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -36,6 +38,12 @@ export function MotionProvider({ children }: MotionProviderProps) {
       lenisRef.current = null
     }
   }, [])
+
+  // Lenis owns the scroll position, so Next.js's built-in scroll-to-top on
+  // navigation never fires. Reset to 0 immediately on every route change.
+  useEffect(() => {
+    lenisRef.current?.scrollTo(0, { immediate: true })
+  }, [pathname])
 
   return (
     <LazyMotion features={domAnimation}>

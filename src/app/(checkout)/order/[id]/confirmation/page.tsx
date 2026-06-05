@@ -207,7 +207,7 @@ export default async function OrderConfirmationPage({
         </Link>
         {order.userId && (
           <Link
-            href="/account"
+            href="/orders"
             className="flex w-full items-center justify-center rounded-xl border border-[var(--border-default)] px-6 py-3.5 text-sm font-500 text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text-primary)] sm:w-auto"
           >
             View my orders

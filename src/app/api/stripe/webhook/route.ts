@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 import { stripe } from '@/lib/stripe'
 import { db } from '@/server/db'
+import { sendOrderConfirmationEmail } from '@/lib/email'
 import type Stripe from 'stripe'
 
 export async function POST(request: NextRequest) {
@@ -48,15 +49,31 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   }
 
   // Idempotency: only process once
-  const order = await db.order.findUnique({ where: { id: orderId } })
+  const order = await db.order.findUnique({
+    where: { id: orderId },
+    include: {
+      items: { include: { product: true, variant: true } },
+      address: true,
+      user: { select: { name: true, email: true } },
+    },
+  })
   if (!order || order.status !== 'PENDING') {
     console.log(`[webhook] order ${orderId} already processed (status: ${order?.status})`)
     return
   }
 
-  await db.order.update({
+  const updatedOrder = await db.order.update({
     where: { id: orderId },
     data: { status: 'PROCESSING' },
+    include: {
+      items: {
+        include: {
+          product: { include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } } },
+          variant: true,
+        },
+      },
+      address: true,
+    },
   })
 
   // Clear DB cart for registered users
@@ -81,7 +98,15 @@ async function handlePaymentSucceeded(paymentIntent: Stripe.PaymentIntent) {
     }
   }
 
-  // Phase 4 hook: sendOrderConfirmationEmail(order)
+  // Send order confirmation email
+  const recipientEmail = order.user?.email ?? order.guestEmail
+  if (recipientEmail) {
+    await sendOrderConfirmationEmail({
+      to: recipientEmail,
+      customerName: order.user?.name ?? undefined,
+      order: updatedOrder,
+    }).catch((err) => console.error('[webhook] confirmation email failed:', err))
+  }
 
   console.log(`[webhook] order ${orderId} → PROCESSING`)
 }

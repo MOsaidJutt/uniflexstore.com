@@ -41,6 +41,10 @@ export async function getAdminProducts(filter: AdminProductsFilter = {}) {
       ...p,
       price: decimalToNumber(p.price),
       compareAt: p.compareAt ? decimalToNumber(p.compareAt) : null,
+      variants: p.variants.map((v) => ({
+        ...v,
+        price: v.price ? decimalToNumber(v.price) : null,
+      })),
     })),
     total,
     pages: Math.ceil(total / pageSize),

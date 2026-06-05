@@ -56,3 +56,9 @@ export async function checkCouponRate(): Promise<boolean> {
   const ip = await getIp()
   return check(`coupon:${ip}`, 20, 5 * 60 * 1000)
 }
+
+/** 30 chat messages per 5 minutes per IP */
+export async function checkChatRate(): Promise<boolean> {
+  const ip = await getIp()
+  return check(`chat:${ip}`, 30, 5 * 60 * 1000)
+}

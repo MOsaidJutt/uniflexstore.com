@@ -4,6 +4,64 @@ import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { db } from '@/server/db'
 import { requireAdmin } from '@/lib/dal'
+import { SUPPORTED_MODELS, type AISettings } from '@/lib/ai-models'
+
+// ─── AI Settings ───────────────────────────────────────────────────────────────
+
+const AI_KEY = 'ai'
+
+export async function getAISettings(): Promise<AISettings> {
+  const row = await db.storeSetting.findUnique({ where: { key: AI_KEY } })
+  if (!row) return { model: process.env.AI_MODEL ?? 'gpt-4o-mini', apiKey: null }
+  try {
+    const data = JSON.parse(row.value) as Record<string, string>
+    return {
+      model: data.model ?? process.env.AI_MODEL ?? 'gpt-4o-mini',
+      apiKey: data.apiKey ?? null,
+    }
+  } catch {
+    return { model: process.env.AI_MODEL ?? 'gpt-4o-mini', apiKey: null }
+  }
+}
+
+export async function updateAISettings(data: {
+  model: string
+  apiKey?: string
+}): Promise<{ success?: boolean; error?: string }> {
+  await requireAdmin()
+
+  const modelOk = SUPPORTED_MODELS.some((m) => m.value === data.model)
+  if (!modelOk) return { error: 'Unsupported model' }
+
+  const current = await getAISettings()
+
+  // Keep existing key if no new one provided
+  const apiKey =
+    data.apiKey && data.apiKey.trim() !== '' ? data.apiKey.trim() : (current.apiKey ?? null)
+
+  await db.storeSetting.upsert({
+    where: { key: AI_KEY },
+    update: { value: JSON.stringify({ model: data.model, apiKey }) },
+    create: { key: AI_KEY, value: JSON.stringify({ model: data.model, apiKey }) },
+  })
+
+  revalidatePath('/admin/settings')
+  return { success: true }
+}
+
+export async function deleteAIApiKey(): Promise<{ success?: boolean; error?: string }> {
+  await requireAdmin()
+  const current = await getAISettings()
+
+  await db.storeSetting.upsert({
+    where: { key: AI_KEY },
+    update: { value: JSON.stringify({ model: current.model, apiKey: null }) },
+    create: { key: AI_KEY, value: JSON.stringify({ model: current.model, apiKey: null }) },
+  })
+
+  revalidatePath('/admin/settings')
+  return { success: true }
+}
 
 const SettingsSchema = z.object({
   storeName: z.string().min(1),

@@ -1,4 +1,5 @@
 import { cache } from 'react'
+import { unstable_cache } from 'next/cache'
 import { db } from '@/server/db'
 import type { BrandAuthorization } from '@prisma/client'
 
@@ -36,13 +37,20 @@ const select = {
   sortOrder: true,
 } as const
 
-export const getActiveAuthorizations = cache(async (): Promise<BrandAuthRecord[]> => {
-  return db.brandAuthorization.findMany({
-    where: activeWhere(),
-    select,
-    orderBy: { sortOrder: 'asc' },
-  })
-})
+const _getActiveAuthorizations = unstable_cache(
+  async (): Promise<BrandAuthRecord[]> => {
+    return db.brandAuthorization.findMany({
+      where: activeWhere(),
+      select,
+      orderBy: { sortOrder: 'asc' },
+    })
+  },
+  ['brand-authorizations'],
+  { tags: ['brand-authorizations'], revalidate: 3600 },
+)
+
+// React.cache deduplicates within a single request on top of the cross-request unstable_cache
+export const getActiveAuthorizations = cache(_getActiveAuthorizations)
 
 export const getAuthorizationForProduct = cache(
   async (productName: string): Promise<BrandAuthRecord | null> => {

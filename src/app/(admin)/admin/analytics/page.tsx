@@ -19,10 +19,10 @@ export default async function AnalyticsPage() {
     : 0
 
   return (
-    <div className="flex flex-1 flex-col overflow-auto">
+    <div className="flex min-h-0 flex-1 flex-col">
       <AdminTopbar title="Analytics" breadcrumbs={[{ label: 'Admin', href: '/admin' }]} />
 
-      <main className="flex-1 overflow-auto p-6 space-y-6">
+      <main className="min-h-0 flex-1 overflow-y-auto p-6 space-y-6">
         {/* Summary stats */}
         <div className="grid gap-4 sm:grid-cols-3">
           <Card>
@@ -62,3 +62,4 @@ export default async function AnalyticsPage() {
     </div>
   )
 }
+

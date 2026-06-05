@@ -24,10 +24,10 @@ export default async function ProductsPage({ searchParams }: PageProps) {
   })
 
   return (
-    <div className="flex flex-1 flex-col overflow-auto">
+    <div className="flex min-h-0 flex-1 flex-col">
       <AdminTopbar title="Products" breadcrumbs={[{ label: 'Admin', href: '/admin' }]} />
 
-      <main className="flex-1 overflow-auto p-6 space-y-4">
+      <main className="min-h-0 flex-1 overflow-y-auto p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-lg font-semibold text-[var(--text-primary)]">Products</h1>
@@ -66,3 +66,4 @@ export default async function ProductsPage({ searchParams }: PageProps) {
     </div>
   )
 }
+

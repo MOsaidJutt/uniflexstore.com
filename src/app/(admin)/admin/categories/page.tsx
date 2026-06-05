@@ -11,9 +11,9 @@ export default async function CategoriesPage() {
   })
 
   return (
-    <div className="flex flex-1 flex-col overflow-auto">
+    <div className="flex min-h-0 flex-1 flex-col">
       <AdminTopbar title="Categories" breadcrumbs={[{ label: 'Admin', href: '/admin' }]} />
-      <main className="flex-1 overflow-auto p-6">
+      <main className="min-h-0 flex-1 overflow-y-auto p-6">
         <CategoriesManager categories={categories} />
       </main>
     </div>

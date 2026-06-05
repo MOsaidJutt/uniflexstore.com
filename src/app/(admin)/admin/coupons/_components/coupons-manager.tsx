@@ -18,8 +18,8 @@ type Coupon = {
   id: string
   code: string
   discountType: 'PERCENTAGE' | 'FIXED_AMOUNT'
-  value: { toNumber: () => number }
-  minOrderAmt: { toNumber: () => number } | null
+  value: number
+  minOrderAmt: number | null
   maxUses: number | null
   usedCount: number
   expiresAt: Date | null
@@ -54,8 +54,8 @@ export function CouponsManager({ coupons }: { coupons: Coupon[] }) {
     reset({
       code: c.code,
       discountType: c.discountType,
-      value: c.value.toNumber(),
-      minOrderAmt: c.minOrderAmt?.toNumber() ?? '',
+      value: c.value,
+      minOrderAmt: c.minOrderAmt ?? '',
       maxUses: c.maxUses ?? '',
       expiresAt: c.expiresAt ? c.expiresAt.toISOString().split('T')[0] : '',
       isActive: c.isActive,
@@ -92,7 +92,7 @@ export function CouponsManager({ coupons }: { coupons: Coupon[] }) {
             {coupons.map((c) => {
               const expired = c.expiresAt && c.expiresAt < now
               const exhausted = c.maxUses && c.usedCount >= c.maxUses
-              const val = c.value.toNumber()
+              const val = c.value
               return (
                 <div key={c.id} className="flex items-center justify-between px-4 py-3 hover:bg-[var(--bg-subtle)] transition-colors">
                   <div className="flex items-center gap-3">
@@ -108,7 +108,7 @@ export function CouponsManager({ coupons }: { coupons: Coupon[] }) {
                       </div>
                       <p className="text-xs text-[var(--text-muted)]">
                         {c.discountType === 'PERCENTAGE' ? `${val}% off` : `${formatUSD(val)} off`}
-                        {c.minOrderAmt ? ` · min order ${formatUSD(c.minOrderAmt.toNumber())}` : ''}
+                        {c.minOrderAmt ? ` · min order ${formatUSD(c.minOrderAmt)}` : ''}
                         {c.maxUses ? ` · ${c.usedCount}/${c.maxUses} uses` : ` · ${c.usedCount} uses`}
                         {c.expiresAt ? ` · expires ${c.expiresAt.toLocaleDateString('en-US', { dateStyle: 'medium' })}` : ''}
                       </p>

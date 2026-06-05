@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import { z } from 'zod'
 import { db } from '@/server/db'
 import { requireAdmin } from '@/lib/dal'
@@ -34,6 +34,7 @@ export async function createBanner(data: z.infer<typeof BannerSchema>) {
   })
   revalidatePath('/admin/banners')
   revalidatePath('/')
+  updateTag('homepage-banners')
   return { success: true }
 }
 
@@ -55,6 +56,7 @@ export async function updateBanner(id: string, data: z.infer<typeof BannerSchema
   })
   revalidatePath('/admin/banners')
   revalidatePath('/')
+  updateTag('homepage-banners')
   return { success: true }
 }
 
@@ -63,6 +65,7 @@ export async function deleteBanner(id: string) {
   await db.banner.delete({ where: { id } })
   revalidatePath('/admin/banners')
   revalidatePath('/')
+  updateTag('homepage-banners')
   return { success: true }
 }
 

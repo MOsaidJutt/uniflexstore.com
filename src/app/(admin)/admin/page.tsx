@@ -25,10 +25,10 @@ export default async function AdminDashboard() {
   const soonCerts = expiringCerts.filter((c) => c.validUntil && c.validUntil >= now)
 
   return (
-    <div className="flex flex-1 flex-col overflow-auto">
+    <div className="flex min-h-0 flex-1 flex-col">
       <AdminTopbar title="Dashboard" />
 
-      <main className="flex-1 overflow-auto p-6 space-y-6">
+      <main className="min-h-0 flex-1 overflow-y-auto p-6 space-y-6">
         {/* Cert alerts banner */}
         {(expiredCerts.length > 0 || soonCerts.length > 0) && (
           <div role="alert" className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-5 py-4 dark:border-amber-900/30 dark:bg-amber-900/10">
@@ -198,3 +198,4 @@ function OrderStatusBadge({ status }: { status: string }) {
   }
   return <Badge variant={map[status] ?? 'secondary'}>{status}</Badge>
 }
+

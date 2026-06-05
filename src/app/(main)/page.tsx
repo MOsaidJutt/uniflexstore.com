@@ -1,3 +1,4 @@
+import { unstable_cache } from 'next/cache'
 import { db } from '@/server/db'
 import { HeroSection } from './_components/hero-section'
 import { BannerStrip } from './_components/banner-strip'
@@ -5,30 +6,38 @@ import { CategoryGrid } from './_components/category-grid'
 import { AuthorizedSection } from './_components/authorized-section'
 import { getActiveAuthorizations } from '@/server/queries/brand-authorizations'
 
-async function getOrbitImages() {
-  const products = await db.product.findMany({
-    where: { isActive: true },
-    select: { images: { orderBy: { sortOrder: 'asc' }, take: 1, select: { url: true, alt: true } } },
-    orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
-    take: 10,
-  })
-  return products
-    .flatMap((p) => p.images.map((img) => ({ src: img.url, alt: img.alt ?? '' })))
-    .filter((img) => img.src.length > 0)
-}
+const getOrbitImages = unstable_cache(
+  async () => {
+    const products = await db.product.findMany({
+      where: { isActive: true },
+      select: { images: { orderBy: { sortOrder: 'asc' }, take: 1, select: { url: true, alt: true } } },
+      orderBy: [{ isFeatured: 'desc' }, { createdAt: 'desc' }],
+      take: 10,
+    })
+    return products
+      .flatMap((p) => p.images.map((img) => ({ src: img.url, alt: img.alt ?? '' })))
+      .filter((img) => img.src.length > 0)
+  },
+  ['homepage-orbit'],
+  { tags: ['homepage-orbit'], revalidate: 3600 },
+)
 
-async function getActiveBanners() {
-  const now = new Date()
-  return db.banner.findMany({
-    where: {
-      isActive: true,
-      OR: [{ startsAt: null }, { startsAt: { lte: now } }],
-      AND: [{ OR: [{ endsAt: null }, { endsAt: { gt: now } }] }],
-    },
-    orderBy: { sortOrder: 'asc' },
-    select: { id: true, title: true, subtitle: true, imageUrl: true, linkUrl: true, linkLabel: true },
-  })
-}
+const getActiveBanners = unstable_cache(
+  async () => {
+    const now = new Date()
+    return db.banner.findMany({
+      where: {
+        isActive: true,
+        OR: [{ startsAt: null }, { startsAt: { lte: now } }],
+        AND: [{ OR: [{ endsAt: null }, { endsAt: { gt: now } }] }],
+      },
+      orderBy: { sortOrder: 'asc' },
+      select: { id: true, title: true, subtitle: true, imageUrl: true, linkUrl: true, linkLabel: true },
+    })
+  },
+  ['homepage-banners'],
+  { tags: ['homepage-banners'], revalidate: 600 },
+)
 
 export default async function HomePage() {
   const [orbitImages, authorizations, banners] = await Promise.all([

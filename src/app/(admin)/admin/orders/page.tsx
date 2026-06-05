@@ -22,10 +22,10 @@ export default async function OrdersPage({ searchParams }: PageProps) {
   const { orders, total, pages } = await getAdminOrders({ status, search: params.search, page })
 
   return (
-    <div className="flex flex-1 flex-col overflow-auto">
+    <div className="flex min-h-0 flex-1 flex-col">
       <AdminTopbar title="Orders" breadcrumbs={[{ label: 'Admin', href: '/admin' }]} />
 
-      <main className="flex-1 overflow-auto p-6 space-y-4">
+      <main className="min-h-0 flex-1 overflow-y-auto p-6 space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-lg font-semibold text-[var(--text-primary)]">Orders</h1>
@@ -64,3 +64,4 @@ export default async function OrdersPage({ searchParams }: PageProps) {
     </div>
   )
 }
+

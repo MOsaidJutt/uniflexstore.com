@@ -15,7 +15,9 @@ import {
   Settings,
   Store,
   ChevronRight,
+  LogOut,
 } from 'lucide-react'
+import { logoutAction } from '@/server/actions/auth'
 import { cn } from '@/lib/utils'
 
 const NAV = [
@@ -74,14 +76,23 @@ export function AdminSidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-[var(--border-default)] px-5 py-3">
+      <div className="border-t border-[var(--border-default)] px-4 py-3 flex flex-col gap-1">
         <Link
           href="/"
-          className="flex items-center gap-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-secondary)] transition-colors"
+          className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-[var(--text-muted)] hover:bg-[var(--bg-subtle)] hover:text-[var(--text-secondary)] transition-colors"
         >
           <Store className="h-3.5 w-3.5" />
           View storefront
         </Link>
+        <form action={logoutAction}>
+          <button
+            type="submit"
+            className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-[var(--text-muted)] hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-950/30 dark:hover:text-red-400 transition-colors"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Sign out
+          </button>
+        </form>
       </div>
     </aside>
   )

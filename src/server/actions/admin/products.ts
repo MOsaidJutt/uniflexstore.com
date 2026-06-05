@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import { z } from 'zod'
 import { db } from '@/server/db'
 import { requireAdmin } from '@/lib/dal'
@@ -52,6 +52,7 @@ export async function createProduct(data: z.infer<typeof ProductSchema>) {
     })
     revalidatePath('/admin/products')
     revalidatePath('/products')
+  updateTag('homepage-orbit')
     return { success: true, id: product.id }
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : 'Failed to create product'
@@ -111,6 +112,7 @@ export async function deleteProduct(id: string) {
     await db.product.delete({ where: { id } })
     revalidatePath('/admin/products')
     revalidatePath('/products')
+  updateTag('homepage-orbit')
     return { success: true }
   } catch {
     return { error: 'Cannot delete product with existing orders' }

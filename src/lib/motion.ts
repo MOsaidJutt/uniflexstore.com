@@ -242,3 +242,57 @@ export const stepBackward: Variants = {
   visible: { opacity: 1, x: 0, transition: easeSmooth },
   exit: { opacity: 0, x: 20, transition: easeNormal },
 }
+
+// ─── Chat Widget ──────────────────────────────────────────────────────────────
+
+// Panel springs open from bottom-right corner
+export const chatPanel: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.82,
+    y: 16,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { type: 'spring', stiffness: 340, damping: 28 },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.88,
+    y: 10,
+    transition: { duration: 0.18, ease: [0.4, 0, 1, 1] },
+  },
+}
+
+// FAB button pulse when there's an unread message
+export const chatFabPulse: Variants = {
+  idle: { scale: 1 },
+  pulse: {
+    scale: [1, 1.12, 1],
+    transition: { duration: 0.4, ease: 'easeInOut' },
+  },
+}
+
+// User message: slides in from right
+export const chatMsgUser: Variants = {
+  hidden: { opacity: 0, x: 12, scale: 0.97 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    transition: { duration: 0.22, ease: [0.16, 1, 0.3, 1] },
+  },
+}
+
+// Assistant message: slides in from left
+export const chatMsgAssistant: Variants = {
+  hidden: { opacity: 0, x: -12, scale: 0.97 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    scale: 1,
+    transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
+  },
+}

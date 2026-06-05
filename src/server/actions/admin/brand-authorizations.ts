@@ -1,6 +1,6 @@
 'use server'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, updateTag } from 'next/cache'
 import { z } from 'zod'
 import { db } from '@/server/db'
 import { requireAdmin } from '@/lib/dal'
@@ -36,6 +36,7 @@ export async function createBrandAuth(data: z.infer<typeof BrandAuthSchema>) {
   })
   revalidatePath('/admin/brand-authorizations')
   revalidatePath('/authorized-reseller')
+  updateTag('brand-authorizations')
   return { success: true }
 }
 
@@ -57,6 +58,7 @@ export async function updateBrandAuth(id: string, data: z.infer<typeof BrandAuth
   })
   revalidatePath('/admin/brand-authorizations')
   revalidatePath('/authorized-reseller')
+  updateTag('brand-authorizations')
   return { success: true }
 }
 
@@ -65,6 +67,7 @@ export async function deleteBrandAuth(id: string) {
   await db.brandAuthorization.delete({ where: { id } })
   revalidatePath('/admin/brand-authorizations')
   revalidatePath('/authorized-reseller')
+  updateTag('brand-authorizations')
   return { success: true }
 }
 
@@ -73,6 +76,7 @@ export async function reorderBrandAuths(ids: string[]) {
   await Promise.all(ids.map((id, index) => db.brandAuthorization.update({ where: { id }, data: { sortOrder: index } })))
   revalidatePath('/admin/brand-authorizations')
   revalidatePath('/authorized-reseller')
+  updateTag('brand-authorizations')
   return { success: true }
 }
 

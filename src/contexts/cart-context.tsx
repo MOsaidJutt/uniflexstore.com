@@ -18,6 +18,7 @@ import {
   removeFromCartDB,
   clearCartDB,
   mergeCartDB,
+  getCartDB,
 } from '@/server/actions/cart'
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
@@ -198,6 +199,17 @@ export function CartProvider({ children, userId, initialItems }: CartProviderPro
 
   const openCart = useCallback(() => dispatch({ type: 'OPEN' }), [])
   const closeCart = useCallback(() => dispatch({ type: 'CLOSE' }), [])
+
+  // Listen for cart refresh events dispatched by the chat widget after action confirmations
+  useEffect(() => {
+    if (!userId) return
+    const handleRefresh = async () => {
+      const fresh = await getCartDB(userId)
+      dispatch({ type: 'SET_ITEMS', items: fresh })
+    }
+    window.addEventListener('uniflex:cart-refresh', handleRefresh)
+    return () => window.removeEventListener('uniflex:cart-refresh', handleRefresh)
+  }, [userId])
 
   const itemCount = useMemo(
     () => state.items.reduce((sum, i) => sum + i.quantity, 0),

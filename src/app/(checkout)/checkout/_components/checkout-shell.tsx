@@ -21,9 +21,10 @@ const STEPS: { id: CheckoutStep; label: string }[] = [
 
 interface CheckoutShellProps {
   userId: string | null
+  initialCouponCode?: string
 }
 
-export function CheckoutShell({ userId }: CheckoutShellProps) {
+export function CheckoutShell({ userId, initialCouponCode = '' }: CheckoutShellProps) {
   const { state, subtotal } = useCart()
   const { items } = state
 
@@ -33,7 +34,7 @@ export function CheckoutShell({ userId }: CheckoutShellProps) {
   const [shippingMethod, setShippingMethod] = useState<ShippingMethod | null>(
     SHIPPING_METHODS[0] ?? null
   )
-  const [couponCode, setCouponCode] = useState('')
+  const [couponCode, setCouponCode] = useState(initialCouponCode)
   const [couponDiscount, setCouponDiscount] = useState(0)
 
   const tax =

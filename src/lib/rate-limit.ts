@@ -62,3 +62,9 @@ export async function checkChatRate(): Promise<boolean> {
   const ip = await getIp()
   return check(`chat:${ip}`, 30, 5 * 60 * 1000)
 }
+
+/** 60 thread saves per hour per IP */
+export async function checkThreadRate(): Promise<boolean> {
+  const ip = await getIp()
+  return check(`thread:${ip}`, 60, 60 * 60 * 1000)
+}

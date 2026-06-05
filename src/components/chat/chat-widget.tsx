@@ -1,8 +1,17 @@
 'use client'
 
-import { useRef, useEffect, useState, useCallback, KeyboardEvent } from 'react'
+import {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  KeyboardEvent,
+  useMemo,
+} from 'react'
+import { usePathname } from 'next/navigation'
 import { m, AnimatePresence, useReducedMotion } from 'motion/react'
 import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
 import type { UIMessage } from 'ai'
 import {
   MessageCircle,
@@ -12,10 +21,17 @@ import {
   Bot,
   ShoppingBag,
   AlertCircle,
+  Sparkles,
 } from 'lucide-react'
 import Link from 'next/link'
-import { chatPanel, chatMsgUser, chatMsgAssistant } from '@/lib/motion'
+import {
+  chatPanel,
+  chatMsgUser,
+  chatMsgAssistant,
+  toolActivity,
+} from '@/lib/motion'
 import type { Transition } from 'motion/react'
+import { ConfirmationCard, type Proposal } from '@/components/chat/confirmation-card'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -23,31 +39,89 @@ interface ChatWidgetProps {
   userId: string | null
 }
 
-// ─── Session-storage persistence ─────────────────────────────────────────────
+// ─── Hidden routes ────────────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'uniflex_chat_messages'
+const HIDDEN_PREFIXES = ['/admin', '/auth', '/checkout']
 
-function loadPersistedMessages(): UIMessage[] {
-  if (typeof window === 'undefined') return []
+function useShowWidget(pathname: string): boolean {
+  return !HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))
+}
+
+// ─── Tool detection helpers ───────────────────────────────────────────────────
+
+type RawPart = Record<string, unknown>
+
+function isToolPart(part: unknown): part is RawPart {
+  if (typeof part !== 'object' || part === null) return false
+  const p = part as RawPart
+  return typeof p.type === 'string' && p.type.startsWith('tool-')
+}
+
+function isActiveTool(part: unknown): boolean {
+  if (!isToolPart(part)) return false
+  const p = part as RawPart
+  return p.state === 'input-streaming' || p.state === 'input-available'
+}
+
+function isProposal(part: unknown): part is RawPart & { output: Proposal } {
+  if (!isToolPart(part)) return false
+  const p = part as RawPart
+  if (p.state !== 'output-available') return false
+  const output = p.output
+  if (typeof output !== 'object' || output === null) return false
+  return (output as Record<string, unknown>).type === 'proposal'
+}
+
+function getToolName(part: unknown): string {
+  if (!isToolPart(part)) return ''
+  return ((part as RawPart).type as string).replace('tool-', '')
+}
+
+// ─── Tool activity labels ─────────────────────────────────────────────────────
+
+const TOOL_LABELS: Record<string, string> = {
+  proposeAddToCart: 'Checking product…',
+  proposeRemoveFromCart: 'Checking cart…',
+  proposeUpdateCartQty: 'Checking cart…',
+  proposeClearCart: 'Loading cart…',
+  proposeApplyCoupon: 'Validating coupon…',
+  proposeCancelOrder: 'Checking order…',
+  proposeReturnRequest: 'Checking return eligibility…',
+  getCart: 'Loading cart…',
+  getCheckoutLink: 'Preparing checkout…',
+  listOrders: 'Loading orders…',
+  getOrderStatus: 'Looking up order…',
+  searchProducts: 'Searching products…',
+  getProduct: 'Loading product details…',
+  checkBrandAuthorization: 'Checking brand authorization…',
+  getPolicy: 'Getting policy…',
+}
+
+// ─── Instant transition ───────────────────────────────────────────────────────
+
+const INSTANT: Transition = { duration: 0 }
+
+// ─── Thread persistence ───────────────────────────────────────────────────────
+
+async function loadThread(): Promise<UIMessage[]> {
   try {
-    const raw = sessionStorage.getItem(STORAGE_KEY)
-    return raw ? (JSON.parse(raw) as UIMessage[]) : []
+    const res = await fetch('/api/chat/thread', { credentials: 'include' })
+    if (!res.ok) return []
+    const data = await res.json()
+    return Array.isArray(data.messages) ? (data.messages as UIMessage[]) : []
   } catch {
     return []
   }
 }
 
-function persistMessages(messages: UIMessage[]) {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages))
-  } catch {
-    // sessionStorage may be full or blocked — silently ignore
-  }
+function saveThread(messages: UIMessage[]) {
+  fetch('/api/chat/thread', {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ messages }),
+  }).catch(() => {})
 }
-
-// ─── Instant transition (reduced-motion override) ─────────────────────────────
-
-const INSTANT: Transition = { duration: 0 }
 
 // ─── Typing indicator ─────────────────────────────────────────────────────────
 
@@ -71,6 +145,63 @@ function TypingIndicator({ reduced }: { reduced: boolean }) {
         )}
       </div>
     </div>
+  )
+}
+
+// ─── Tool activity pill ───────────────────────────────────────────────────────
+
+function ToolActivityPill({ label, reduced }: { label: string; reduced: boolean }) {
+  return (
+    <m.div
+      key={label}
+      variants={toolActivity}
+      initial="hidden"
+      animate="visible"
+      exit="exit"
+      transition={reduced ? INSTANT : undefined}
+      className="mx-4 flex items-center gap-2 self-start rounded-full border border-[var(--brand-accent)]/20 bg-[var(--brand-accent)]/8 px-3 py-1.5"
+    >
+      <Sparkles className="h-3 w-3 animate-pulse text-[var(--brand-accent)]" />
+      <span className="text-[11px] font-500 text-[var(--brand-accent)]">{label}</span>
+    </m.div>
+  )
+}
+
+// ─── Message text (markdown link parser) ─────────────────────────────────────
+
+function MessageText({ text }: { text: string }) {
+  const parts = text.split(/(\[.+?\]\(.+?\))/g)
+  return (
+    <>
+      {parts.map((part, i) => {
+        const match = part.match(/^\[(.+?)\]\((.+?)\)$/)
+        if (match) {
+          const [, label, href] = match
+          return href.startsWith('/') ? (
+            <Link key={i} href={href} className="underline underline-offset-2 hover:opacity-80">
+              {label}
+            </Link>
+          ) : (
+            <a
+              key={i}
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-2 hover:opacity-80"
+            >
+              {label}
+              <span className="sr-only"> (opens in new tab)</span>
+            </a>
+          )
+        }
+        return part.split('\n').map((line, j, arr) => (
+          <span key={`${i}-${j}`}>
+            {line}
+            {j < arr.length - 1 && <br />}
+          </span>
+        ))
+      })}
+    </>
   )
 }
 
@@ -113,86 +244,98 @@ function MessageBubble({ message, reduced }: { message: UIMessage; reduced: bool
   )
 }
 
-// Renders text with [label](url) markdown link detection
-function MessageText({ text }: { text: string }) {
-  const parts = text.split(/(\[.+?\]\(.+?\))/g)
+// ─── Thread loading skeleton ──────────────────────────────────────────────────
 
+function ThreadSkeleton() {
   return (
-    <>
-      {parts.map((part, i) => {
-        const match = part.match(/^\[(.+?)\]\((.+?)\)$/)
-        if (match) {
-          const [, label, href] = match
-          return href.startsWith('/') ? (
-            <Link key={i} href={href} className="underline underline-offset-2 hover:opacity-80">
-              {label}
-            </Link>
-          ) : (
-            <a
-              key={i}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-2 hover:opacity-80"
-            >
-              {label}
-              <span className="sr-only"> (opens in new tab)</span>
-            </a>
-          )
-        }
-        return part.split('\n').map((line, j, arr) => (
-          <span key={`${i}-${j}`}>
-            {line}
-            {j < arr.length - 1 && <br />}
-          </span>
-        ))
-      })}
-    </>
+    <div className="flex flex-col gap-3 px-4 py-4" aria-label="Loading conversation…">
+      <div className="h-10 w-4/5 animate-pulse rounded-2xl bg-[var(--bg-subtle)]" />
+      <div className="h-10 w-3/5 animate-pulse self-end rounded-2xl bg-[var(--bg-subtle)]" />
+      <div className="h-10 w-[72%] animate-pulse rounded-2xl bg-[var(--bg-subtle)]" />
+    </div>
   )
 }
 
 // ─── Quick replies ────────────────────────────────────────────────────────────
 
 const QUICK_REPLIES = [
-  "What electronics do you have?",
-  "Gifts for kids under $30?",
+  'What electronics do you have?',
+  'Gifts for kids under $30?',
   "What's your return policy?",
-  "Are you an authorized Sony dealer?",
+  'Are you an authorized Sony dealer?',
 ]
 
-// ─── Main widget ──────────────────────────────────────────────────────────────
+// ─── Focus trap ───────────────────────────────────────────────────────────────
 
 const FOCUSABLE_SELECTORS =
   'a[href], button:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
+// ─── Main widget ──────────────────────────────────────────────────────────────
 
 export function ChatWidget({ userId }: ChatWidgetProps) {
   const reducedMotion = useReducedMotion() ?? false
   const [isOpen, setIsOpen] = useState(false)
   const [inputValue, setInputValue] = useState('')
-  const [initialMessages] = useState<UIMessage[]>(() => loadPersistedMessages())
+  const [threadLoaded, setThreadLoaded] = useState(false)
+
+  const [dismissedProposals, setDismissedProposals] = useState<Set<string>>(new Set())
+
+  const pathname = usePathname()
+  const showWidget = useShowWidget(pathname)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const fabRef = useRef<HTMLButtonElement>(null)
 
-  const { messages, sendMessage, status, error, clearError } = useChat({
-    messages: initialMessages,
-  })
+  // Context ref — updated on pathname change, read at send time by transport headers fn
+  const pathnameRef = useRef(pathname)
+  useEffect(() => {
+    pathnameRef.current = pathname
+  }, [pathname])
+
+  // Transport sends x-chat-context header on every request; headers fn reads pathnameRef at call time
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: '/api/chat',
+        headers: () => {
+          const productSlugMatch = pathnameRef.current.match(/^\/products\/([^/]+)/)
+          return {
+            'x-chat-context': JSON.stringify({
+              pathname: pathnameRef.current,
+              productSlug: productSlugMatch?.[1],
+            }),
+          }
+        },
+      }),
+    []
+  )
+
+  const { messages, sendMessage, setMessages, status, error, clearError } = useChat({ transport })
 
   const isLoading = status === 'submitted' || status === 'streaming'
   const hasMessages = messages.length > 0
 
-  // Close panel and return focus to FAB
+  // Load thread on mount
+  useEffect(() => {
+    loadThread().then((msgs) => {
+      if (msgs.length > 0) setMessages(msgs)
+      setThreadLoaded(true)
+    })
+  }, [setMessages])
+
+  // Save thread whenever messages change (debounced 1.5 s)
+  useEffect(() => {
+    if (!threadLoaded || messages.length === 0) return
+    const id = setTimeout(() => saveThread(messages), 1500)
+    return () => clearTimeout(id)
+  }, [messages, threadLoaded])
+
   const closePanel = useCallback(() => {
     setIsOpen(false)
     requestAnimationFrame(() => fabRef.current?.focus())
   }, [])
-
-  // Persist to sessionStorage on every change
-  useEffect(() => {
-    persistMessages(messages)
-  }, [messages])
 
   // Auto-scroll
   useEffect(() => {
@@ -206,28 +349,22 @@ export function ChatWidget({ userId }: ChatWidgetProps) {
     return () => clearTimeout(id)
   }, [isOpen])
 
-  // Escape to close + focus trap
+  // Escape + focus trap
   useEffect(() => {
     if (!isOpen || !panelRef.current) return
     const panel = panelRef.current
-
     const handleKey = (e: globalThis.KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        closePanel()
-        return
-      }
+      if (e.key === 'Escape') { closePanel(); return }
       if (e.key !== 'Tab') return
       const els = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTORS))
       if (els.length === 0) return
-      const first = els[0]
-      const last = els[els.length - 1]
+      const first = els[0]; const last = els[els.length - 1]
       if (e.shiftKey) {
         if (document.activeElement === first) { e.preventDefault(); last.focus() }
       } else {
         if (document.activeElement === last) { e.preventDefault(); first.focus() }
       }
     }
-
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
   }, [isOpen, closePanel])
@@ -240,24 +377,59 @@ export function ChatWidget({ userId }: ChatWidgetProps) {
   }, [inputValue, isLoading, sendMessage])
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      handleSend()
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend() }
   }
+
+  // ── Confirmed action handler ───────────────────────────────────────────────
+
+  const handleConfirm = useCallback(
+    async (params: Proposal['params']): Promise<{ message: string }> => {
+      const res = await fetch('/api/chat/action', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(params),
+      })
+      const data = await res.json()
+      if (res.status === 401) throw new Error('SIGN_IN_REQUIRED')
+      if (!res.ok) throw new Error(data.error ?? 'Action failed.')
+
+      window.dispatchEvent(new CustomEvent('uniflex:cart-refresh'))
+      return { message: data.message }
+    },
+    []
+  )
+
+  const handleCancelProposal = useCallback((proposalId: string) => {
+    setDismissedProposals((prev) => new Set(prev).add(proposalId))
+  }, [])
+
+  // Dismiss proposal card 1.5 s after confirm success so user sees the checkmark briefly
+  const handleSuccessProposal = useCallback((proposalId: string) => {
+    setTimeout(() => {
+      setDismissedProposals((prev) => new Set(prev).add(proposalId))
+    }, 1500)
+  }, [])
+
+  // ── Detect active tool for activity pill ─────────────────────────────────
+
+  const activeToolLabel = useMemo(() => {
+    if (!isLoading) return null
+    for (const msg of [...messages].reverse()) {
+      for (const part of msg.parts) {
+        if (isActiveTool(part)) {
+          const name = getToolName(part)
+          return TOOL_LABELS[name] ?? 'Working…'
+        }
+      }
+    }
+    return null
+  }, [messages, isLoading])
+
+  if (!showWidget) return null
 
   return (
     <>
-      {/* Keyframe for typing dots — omitted when reduced motion */}
-      {!reducedMotion && (
-        <style>{`
-          @keyframes chatDotBounce {
-            0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-            30% { transform: translateY(-5px); opacity: 1; }
-          }
-        `}</style>
-      )}
-
       {/* Panel */}
       <AnimatePresence>
         {isOpen && (
@@ -272,8 +444,8 @@ export function ChatWidget({ userId }: ChatWidgetProps) {
             role="dialog"
             aria-modal="true"
             aria-label="UniFlex Store chat assistant"
-            className="fixed bottom-[5.5rem] right-4 z-[450] flex w-[360px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] shadow-2xl"
-            style={{ height: 'min(580px, calc(100dvh - 8rem))', transformOrigin: 'bottom right' }}
+            className="fixed bottom-[5.5rem] right-4 z-[450] flex w-[380px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] shadow-2xl"
+            style={{ height: 'min(600px, calc(100dvh - 8rem))', transformOrigin: 'bottom right' }}
           >
             {/* Header */}
             <div className="flex shrink-0 items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--brand-primary)] px-4 py-3.5">
@@ -283,7 +455,7 @@ export function ChatWidget({ userId }: ChatWidgetProps) {
               <div className="flex-1">
                 <p className="text-sm font-600 text-white">UniFlex Assistant</p>
                 <p className="text-[11px] text-white/70">
-                  Ask me about products, orders &amp; policies
+                  Shop, manage orders &amp; more
                 </p>
               </div>
               <button
@@ -295,19 +467,28 @@ export function ChatWidget({ userId }: ChatWidgetProps) {
               </button>
             </div>
 
-            {/* Live region — screen readers announce new assistant replies */}
-            <div aria-live="polite" aria-atomic="false" className="sr-only">
-              {hasMessages &&
-                messages[messages.length - 1]?.role === 'assistant' &&
-                messages[messages.length - 1]?.parts
-                  .filter((p) => p.type === 'text')
-                  .map((p) => (p.type === 'text' ? p.text : ''))
-                  .join('')}
+            {/* Live region — aria-busy tells screen readers a response is in progress */}
+            <div
+              aria-live="polite"
+              aria-atomic="false"
+              aria-busy={isLoading}
+              className="sr-only"
+            >
+              {isLoading
+                ? 'Assistant is thinking…'
+                : hasMessages &&
+                  messages[messages.length - 1]?.role === 'assistant' &&
+                  messages[messages.length - 1]?.parts
+                    .filter((p) => p.type === 'text')
+                    .map((p) => (p.type === 'text' ? p.text : ''))
+                    .join('')}
             </div>
 
             {/* Message list */}
             <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto py-4 overscroll-contain">
-              {!hasMessages ? (
+              {!threadLoaded ? (
+                <ThreadSkeleton />
+              ) : !hasMessages ? (
                 <div className="flex flex-col items-center gap-5 px-6 py-6 text-center">
                   <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--brand-accent)]/10">
                     <Bot className="h-6 w-6 text-[var(--brand-accent)]" aria-hidden="true" />
@@ -317,7 +498,7 @@ export function ChatWidget({ userId }: ChatWidgetProps) {
                       Hi! I&apos;m your UniFlex shopping assistant.
                     </p>
                     <p className="mt-1 text-xs text-[var(--text-muted)]">
-                      I can help with products, orders, policies, and brand authorizations.
+                      I can search products, manage your cart, look up orders, and more.
                     </p>
                   </div>
                   <div className="flex w-full flex-col gap-2">
@@ -336,9 +517,32 @@ export function ChatWidget({ userId }: ChatWidgetProps) {
               ) : (
                 <>
                   {messages.map((msg) => (
-                    <MessageBubble key={msg.id} message={msg} reduced={reducedMotion} />
+                    <MessageRow
+                      key={msg.id}
+                      message={msg}
+                      reduced={reducedMotion}
+                      dismissedProposals={dismissedProposals}
+                      onConfirm={handleConfirm}
+                      onCancelProposal={handleCancelProposal}
+                      onSuccessProposal={handleSuccessProposal}
+                    />
                   ))}
-                  {isLoading && <TypingIndicator reduced={reducedMotion} />}
+
+                  {/* Tool activity pill */}
+                  <AnimatePresence mode="wait">
+                    {activeToolLabel && (
+                      <ToolActivityPill
+                        key={activeToolLabel}
+                        label={activeToolLabel}
+                        reduced={reducedMotion}
+                      />
+                    )}
+                  </AnimatePresence>
+
+                  {/* Typing indicator (text streaming, no active tool) */}
+                  {isLoading && !activeToolLabel && (
+                    <TypingIndicator reduced={reducedMotion} />
+                  )}
                 </>
               )}
 
@@ -378,7 +582,7 @@ export function ChatWidget({ userId }: ChatWidgetProps) {
                 >
                   Sign in
                 </Link>{' '}
-                to look up your order status.
+                to add items to cart, look up orders, and more.
               </div>
             )}
 
@@ -390,7 +594,6 @@ export function ChatWidget({ userId }: ChatWidgetProps) {
                   value={inputValue}
                   onChange={(e) => {
                     setInputValue(e.target.value)
-                    // Cross-browser auto-resize (fallback for no fieldSizing support)
                     const el = e.target
                     el.style.height = 'auto'
                     el.style.height = `${Math.min(el.scrollHeight, 112)}px`
@@ -457,6 +660,50 @@ export function ChatWidget({ userId }: ChatWidgetProps) {
           )}
         </AnimatePresence>
       </button>
+    </>
+  )
+}
+
+// ─── MessageRow — renders text bubbles + inline proposal cards ────────────────
+
+interface MessageRowProps {
+  message: UIMessage
+  reduced: boolean
+  dismissedProposals: Set<string>
+  onConfirm: (params: Proposal['params']) => Promise<{ message: string }>
+  onCancelProposal: (proposalId: string) => void
+  onSuccessProposal: (proposalId: string) => void
+}
+
+function MessageRow({
+  message,
+  reduced,
+  dismissedProposals,
+  onConfirm,
+  onCancelProposal,
+  onSuccessProposal,
+}: MessageRowProps) {
+  return (
+    <>
+      <MessageBubble message={message} reduced={reduced} />
+      {/* AnimatePresence enables exit animation when a proposal is dismissed */}
+      <AnimatePresence>
+        {message.parts.flatMap((part, i) => {
+          if (!isProposal(part)) return []
+          const proposal = (part as RawPart).output as Proposal
+          if (dismissedProposals.has(proposal.proposalId)) return []
+          return [
+            <ConfirmationCard
+              key={`${message.id}-proposal-${i}`}
+              proposal={proposal}
+              reduced={reduced}
+              onConfirm={onConfirm}
+              onCancel={() => onCancelProposal(proposal.proposalId)}
+              onSuccess={() => onSuccessProposal(proposal.proposalId)}
+            />,
+          ]
+        })}
+      </AnimatePresence>
     </>
   )
 }

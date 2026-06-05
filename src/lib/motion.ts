@@ -296,3 +296,27 @@ export const chatMsgAssistant: Variants = {
     transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
   },
 }
+
+// Confirmation card: scales in from slightly below with a spring
+export const confirmCard: Variants = {
+  hidden: { opacity: 0, y: 12, scale: 0.96 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: 'spring', stiffness: 380, damping: 30 },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.94,
+    y: -4,
+    transition: { duration: 0.18, ease: [0.4, 0, 1, 1] },
+  },
+}
+
+// Tool activity pill: fades + slides in
+export const toolActivity: Variants = {
+  hidden: { opacity: 0, y: 4 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } },
+  exit: { opacity: 0, y: -2, transition: { duration: 0.15 } },
+}

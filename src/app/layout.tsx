@@ -3,6 +3,8 @@ import { Inter, Playfair_Display } from 'next/font/google'
 import { ThemeProvider } from '@/components/shared/theme-provider'
 import { MotionProvider } from '@/components/shared/motion-provider'
 import { PlaceholderFill } from '@/components/shared/placeholder-fill'
+import { ChatWidget } from '@/components/chat/chat-widget'
+import { getSession } from '@/lib/dal'
 import { siteConfig } from '@/config/site'
 import './globals.css'
 
@@ -62,7 +64,10 @@ export const viewport: Viewport = {
   initialScale: 1,
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const session = await getSession()
+  const userId = session?.user?.id ?? null
+
   return (
     <html
       lang="en"
@@ -79,6 +84,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <MotionProvider>
             {children}
             <PlaceholderFill />
+            {/* Chat widget mounts here once and persists across all client-side navigation */}
+            <ChatWidget userId={userId} />
           </MotionProvider>
         </ThemeProvider>
       </body>

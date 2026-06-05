@@ -176,20 +176,17 @@ export function Header({ userButton }: { userButton?: React.ReactNode }) {
           {/* Logo */}
           <Link
             href="/"
-            className="shrink-0"
+            className="shrink-0 transition-opacity duration-150 hover:opacity-80"
             aria-label="UniFlex Global — Home"
           >
-            {/* White pill keeps the PNG legible on both light and dark backgrounds */}
-            <span className="flex h-10 items-center rounded-xl bg-white px-2 shadow-sm transition-opacity duration-150 hover:opacity-90">
-              <Image
-                src="/logo.png"
-                alt="UniFlex Global"
-                width={120}
-                height={36}
-                priority
-                className="h-8 w-auto object-contain"
-              />
-            </span>
+            <Image
+              src="/logo.png"
+              alt="UniFlex Global"
+              width={160}
+              height={48}
+              priority
+              className="h-11 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop nav */}
@@ -395,15 +392,13 @@ export function Header({ userButton }: { userButton?: React.ReactNode }) {
               className="fixed inset-y-0 right-0 z-[400] w-full max-w-sm overflow-y-auto bg-[var(--bg-base)] shadow-2xl lg:hidden"
             >
               <div className="flex h-16 items-center justify-between px-5">
-                <span className="flex h-9 items-center rounded-lg bg-white px-1.5">
-                  <Image
-                    src="/logo.png"
-                    alt="UniFlex Global"
-                    width={90}
-                    height={28}
-                    className="h-7 w-auto object-contain"
-                  />
-                </span>
+                <Image
+                  src="/logo.png"
+                  alt="UniFlex Global"
+                  width={110}
+                  height={34}
+                  className="h-9 w-auto object-contain"
+                />
                 <button
                   onClick={() => setMobileOpen(false)}
                   aria-label="Close navigation menu"

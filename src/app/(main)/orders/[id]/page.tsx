@@ -2,9 +2,9 @@ import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ArrowLeft, Package, MapPin, Truck } from 'lucide-react'
+import { ArrowLeft, Package, MapPin, Truck, ExternalLink } from 'lucide-react'
 import { requireAuth } from '@/lib/dal'
-import { getOrderById } from '@/server/actions/orders'
+import { getOrderById } from '@/server/queries/orders'
 import { formatUSD } from '@/lib/utils'
 import { OrderStatusBadge } from '../_components/order-status-badge'
 import { StatusTimeline } from './_components/status-timeline'
@@ -41,7 +41,6 @@ export default async function OrderDetailPage({
   const shippingAddr = order.address ?? (order.shippingAddress as Record<string, string> | null)
   const canCancel    = ['PENDING', 'PROCESSING'].includes(order.status)
   const canReturn    = order.status === 'DELIVERED'
-  const isActive     = !['CANCELLED', 'REFUNDED'].includes(order.status)
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
@@ -70,25 +69,56 @@ export default async function OrderDetailPage({
         <OrderStatusBadge status={order.status} className="mt-1" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
+      {/* Two-column layout — collapses at md breakpoint (tablet portrait) */}
+      <div className="grid gap-6 md:grid-cols-[1fr_296px]">
         {/* Left column */}
         <div className="space-y-6">
-          {/* Status timeline */}
-          <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] p-6 shadow-[var(--shadow-xs)]">
-            <h2 className="mb-5 text-sm font-700 uppercase tracking-widest text-[var(--text-muted)]">
+
+          {/* Status timeline — primary card, stronger border */}
+          <section
+            className="rounded-2xl border border-[var(--border-default)] bg-[var(--bg-base)] p-6 shadow-[var(--shadow-sm)]"
+            aria-labelledby="section-status"
+          >
+            <h2 id="section-status" className="mb-5 text-base font-700 text-[var(--text-primary)]">
               Order status
             </h2>
             <StatusTimeline status={order.status} updatedAt={order.updatedAt} />
+
+            {/* Tracking info — shown when shipped */}
+            {order.status === 'SHIPPED' && order.trackingNumber && (
+              <div className="mt-5 rounded-xl bg-[var(--brand-teal-light)] px-4 py-3.5">
+                <p className="text-xs font-700 uppercase tracking-wider text-[var(--brand-accent)]">
+                  Tracking
+                </p>
+                <p className="mt-1 font-mono text-sm font-600 text-[var(--text-primary)]">
+                  {order.trackingNumber}
+                </p>
+                {order.trackingUrl && (
+                  <a
+                    href={order.trackingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1.5 inline-flex items-center gap-1 text-xs text-[var(--brand-accent)] hover:underline"
+                  >
+                    Track package
+                    <ExternalLink className="h-3 w-3" aria-hidden="true" />
+                  </a>
+                )}
+              </div>
+            )}
           </section>
 
-          {/* Items */}
-          <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] p-6 shadow-[var(--shadow-xs)]">
-            <h2 className="mb-4 text-sm font-700 uppercase tracking-widest text-[var(--text-muted)]">
-              Items ({order.items.length})
+          {/* Items — borderless, divider rhythm */}
+          <section aria-labelledby="section-items">
+            <h2 id="section-items" className="mb-3 text-sm font-600 text-[var(--text-secondary)]">
+              {order.items.length === 1 ? '1 item' : `${order.items.length} items`}
             </h2>
-            <ul role="list" className="divide-y divide-[var(--border-subtle)]">
+            <ul
+              role="list"
+              className="divide-y divide-[var(--border-subtle)] rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)]"
+            >
               {order.items.map((item) => (
-                <li key={item.id} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
+                <li key={item.id} className="flex items-center gap-4 p-4 first:pt-4 last:pb-4">
                   <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--bg-subtle)]">
                     {item.product.images[0] ? (
                       <Image
@@ -107,7 +137,8 @@ export default async function OrderDetailPage({
                   <div className="min-w-0 flex-1">
                     <Link
                       href={`/products/${item.product.slug}`}
-                      className="truncate text-sm font-600 text-[var(--text-primary)] hover:underline hover:decoration-[var(--brand-accent)]"
+                      title={item.product.name}
+                      className="block truncate text-sm font-600 text-[var(--text-primary)] hover:underline hover:decoration-[var(--brand-accent)]"
                     >
                       {item.product.name}
                     </Link>
@@ -116,9 +147,7 @@ export default async function OrderDetailPage({
                         {item.variant.name}: {item.variant.value}
                       </p>
                     )}
-                    <p className="mt-0.5 text-xs text-[var(--text-muted)]">
-                      Qty: {item.quantity}
-                    </p>
+                    <p className="mt-0.5 text-xs text-[var(--text-muted)]">Qty: {item.quantity}</p>
                   </div>
                   <span className="shrink-0 text-sm font-700 tabular-nums text-[var(--text-primary)]">
                     {formatUSD(Number(item.price) * item.quantity)}
@@ -128,12 +157,9 @@ export default async function OrderDetailPage({
             </ul>
           </section>
 
-          {/* Actions */}
+          {/* Actions — no card wrapper, buttons are self-describing */}
           {(canCancel || canReturn) && (
-            <section className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] p-6 shadow-[var(--shadow-xs)]">
-              <h2 className="mb-4 text-sm font-700 uppercase tracking-widest text-[var(--text-muted)]">
-                Actions
-              </h2>
+            <section aria-label="Order actions">
               <div className="flex flex-wrap gap-3">
                 {canCancel && <CancelOrderButton orderId={order.id} />}
                 {canReturn && (
@@ -147,14 +173,12 @@ export default async function OrderDetailPage({
           )}
         </div>
 
-        {/* Right column */}
-        <div className="space-y-6">
+        {/* Right column — tinted compact cards, no border */}
+        <div className="space-y-4">
+
           {/* Order summary */}
-          <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] p-5 shadow-[var(--shadow-xs)]">
-            <h2 className="mb-3 flex items-center gap-2 text-sm font-700 uppercase tracking-widest text-[var(--text-muted)]">
-              <Package className="h-4 w-4 text-[var(--brand-accent)]" aria-hidden="true" />
-              Summary
-            </h2>
+          <div className="rounded-2xl bg-[var(--bg-subtle)] p-5">
+            <h2 className="mb-3 text-sm font-600 text-[var(--text-secondary)]">Order total</h2>
             <dl className="space-y-1.5 text-sm">
               <div className="flex justify-between text-[var(--text-secondary)]">
                 <dt>Subtotal</dt>
@@ -173,7 +197,7 @@ export default async function OrderDetailPage({
                 </dd>
               </div>
               <div className="flex justify-between text-[var(--text-secondary)]">
-                <dt>Tax</dt>
+                <dt>Sales tax</dt>
                 <dd className="tabular-nums">{formatUSD(Number(order.tax))}</dd>
               </div>
               <div className="flex justify-between border-t border-[var(--border-subtle)] pt-2 font-700 text-[var(--text-primary)]">
@@ -185,11 +209,8 @@ export default async function OrderDetailPage({
 
           {/* Shipping address */}
           {shippingAddr && (
-            <div className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] p-5 shadow-[var(--shadow-xs)]">
-              <h2 className="mb-3 flex items-center gap-2 text-sm font-700 uppercase tracking-widest text-[var(--text-muted)]">
-                <MapPin className="h-4 w-4 text-[var(--brand-accent)]" aria-hidden="true" />
-                Ship to
-              </h2>
+            <div className="rounded-2xl bg-[var(--bg-subtle)] p-5">
+              <h2 className="mb-3 text-sm font-600 text-[var(--text-secondary)]">Shipping address</h2>
               <address className="not-italic text-sm text-[var(--text-secondary)]">
                 {(shippingAddr as Record<string, string>).firstName && (
                   <p className="font-600 text-[var(--text-primary)]">

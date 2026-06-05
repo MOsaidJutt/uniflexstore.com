@@ -1,8 +1,10 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import type { Metadata } from 'next'
 import { ChevronRight, Truck, Shield, RotateCcw } from 'lucide-react'
 import { getProductBySlug, getRelatedProducts, getAllProductSlugs } from '@/server/actions/catalog'
+import { BrandAuthBadge } from '@/components/catalog/brand-auth-badge'
 
 export async function generateStaticParams() {
   const slugs = await getAllProductSlugs()
@@ -174,6 +176,11 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
             stock={product.stock}
             variants={product.variants}
           />
+
+          {/* Brand authorization badge — streams independently, doesn't block PDP render */}
+          <Suspense fallback={null}>
+            <BrandAuthBadge productName={product.name} />
+          </Suspense>
 
           {/* Trust signals */}
           <div className="grid grid-cols-3 gap-2 border-t border-[var(--border-subtle)] pt-6">

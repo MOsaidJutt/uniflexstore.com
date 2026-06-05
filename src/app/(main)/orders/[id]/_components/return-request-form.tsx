@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef, useEffect } from 'react'
 import { m, AnimatePresence } from 'motion/react'
 import { RotateCcw, CheckCircle2, Loader2 } from 'lucide-react'
 import { submitReturnRequest } from '@/server/actions/orders'
@@ -25,6 +25,26 @@ export function ReturnRequestForm({ orderId, alreadySubmitted }: Props) {
   const [done, setDone]       = useState(alreadySubmitted)
   const [error, setError]     = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const formRef    = useRef<HTMLFormElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+
+  // Move focus into the form when it opens; return focus when it closes.
+  useEffect(() => {
+    if (open) {
+      formRef.current?.querySelector<HTMLElement>('select, textarea, button')?.focus()
+    }
+  }, [open])
+
+  function handleOpen() {
+    setOpen(true)
+    setError(null)
+  }
+
+  function handleClose() {
+    setOpen(false)
+    setError(null)
+    requestAnimationFrame(() => triggerRef.current?.focus())
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -43,7 +63,7 @@ export function ReturnRequestForm({ orderId, alreadySubmitted }: Props) {
 
   if (done) {
     return (
-      <div className="flex items-center gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-4 py-3.5">
+      <div className="flex items-center gap-3 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-4 py-3.5" role="status">
         <CheckCircle2 className="h-4 w-4 shrink-0 text-[var(--brand-accent)]" aria-hidden="true" />
         <div>
           <p className="text-sm font-600 text-[var(--text-primary)]">Return request submitted</p>
@@ -57,29 +77,34 @@ export function ReturnRequestForm({ orderId, alreadySubmitted }: Props) {
 
   return (
     <div>
-      {!open ? (
-        <button
-          onClick={() => setOpen(true)}
-          className="flex items-center gap-2 rounded-xl border border-[var(--border-default)] bg-[var(--bg-base)] px-4 py-2.5 text-sm font-500 text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]"
-        >
-          <RotateCcw className="h-4 w-4" aria-hidden="true" />
-          Request return / refund
-        </button>
-      ) : (
-        <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
+        {!open ? (
+          <m.div key="trigger" exit={{ opacity: 0, transition: { duration: 0.1 } }}>
+            <button
+              ref={triggerRef}
+              onClick={handleOpen}
+              className="flex items-center gap-2 rounded-xl border border-[var(--border-default)] bg-[var(--bg-base)] px-4 py-2.5 text-sm font-500 text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]"
+            >
+              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+              Request return / refund
+            </button>
+          </m.div>
+        ) : (
           <m.form
             key="form"
+            ref={formRef}
             onSubmit={handleSubmit}
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0, transition: { duration: 0.25, ease: [0.23, 1, 0.32, 1] } }}
             exit={{ opacity: 0, y: 4, transition: { duration: 0.15 } }}
             className="rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] p-5"
+            onKeyDown={(e) => e.key === 'Escape' && !isPending && handleClose()}
+            aria-label="Return request form"
           >
             <h3 className="mb-4 text-sm font-700 text-[var(--text-primary)]">
               Request a return or refund
             </h3>
 
-            {/* Reason */}
             <div className="mb-4">
               <label
                 htmlFor="return-reason"
@@ -101,7 +126,6 @@ export function ReturnRequestForm({ orderId, alreadySubmitted }: Props) {
               </select>
             </div>
 
-            {/* Details */}
             <div className="mb-5">
               <label
                 htmlFor="return-details"
@@ -119,7 +143,7 @@ export function ReturnRequestForm({ orderId, alreadySubmitted }: Props) {
                 placeholder="Describe the issue…"
                 className="w-full resize-none rounded-xl border border-[var(--border-default)] bg-[var(--bg-base)] px-3 py-2.5 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] outline-none transition-colors focus:border-[var(--brand-accent)] focus:ring-2 focus:ring-[var(--brand-accent)]/20"
               />
-              <p className="mt-1 text-right text-[10px] text-[var(--text-muted)]">
+              <p className="mt-1 text-right text-[11px] text-[var(--text-muted)]" aria-live="polite">
                 {details.length}/500
               </p>
             </div>
@@ -139,7 +163,7 @@ export function ReturnRequestForm({ orderId, alreadySubmitted }: Props) {
               </button>
               <button
                 type="button"
-                onClick={() => { setOpen(false); setError(null) }}
+                onClick={handleClose}
                 disabled={isPending}
                 className="rounded-xl border border-[var(--border-default)] px-4 py-2.5 text-sm font-500 text-[var(--text-secondary)] transition-colors hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]"
               >
@@ -147,8 +171,8 @@ export function ReturnRequestForm({ orderId, alreadySubmitted }: Props) {
               </button>
             </div>
           </m.form>
-        </AnimatePresence>
-      )}
+        )}
+      </AnimatePresence>
     </div>
   )
 }

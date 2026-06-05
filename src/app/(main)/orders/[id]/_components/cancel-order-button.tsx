@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef, useEffect } from 'react'
 import { m, AnimatePresence } from 'motion/react'
 import { XCircle, AlertTriangle, Loader2 } from 'lucide-react'
 import { cancelOrder } from '@/server/actions/orders'
@@ -11,8 +11,28 @@ interface Props {
 
 export function CancelOrderButton({ orderId }: Props) {
   const [showConfirm, setShowConfirm] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [isPending, startTransition] = useTransition()
+  const [error, setError]             = useState<string | null>(null)
+  const [isPending, startTransition]  = useTransition()
+  const confirmRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+
+  // Move focus into the dialog when it opens; return focus when it closes.
+  useEffect(() => {
+    if (showConfirm) {
+      confirmRef.current?.focus()
+    }
+  }, [showConfirm])
+
+  function open() {
+    setShowConfirm(true)
+  }
+
+  function close() {
+    setShowConfirm(false)
+    setError(null)
+    // Return focus to the trigger after the dialog closes.
+    requestAnimationFrame(() => triggerRef.current?.focus())
+  }
 
   function handleCancel() {
     setError(null)
@@ -21,7 +41,6 @@ export function CancelOrderButton({ orderId }: Props) {
         await cancelOrder(orderId)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Something went wrong')
-      } finally {
         setShowConfirm(false)
       }
     })
@@ -29,30 +48,43 @@ export function CancelOrderButton({ orderId }: Props) {
 
   return (
     <div>
-      {!showConfirm ? (
-        <button
-          onClick={() => setShowConfirm(true)}
-          className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-500 text-red-700 transition-colors hover:bg-red-100 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/30"
-        >
-          <XCircle className="h-4 w-4" aria-hidden="true" />
-          Cancel order
-        </button>
-      ) : (
-        <AnimatePresence mode="wait">
+      <AnimatePresence mode="wait" initial={false}>
+        {!showConfirm ? (
+          <m.div
+            key="trigger"
+            exit={{ opacity: 0, transition: { duration: 0.1 } }}
+          >
+            <button
+              ref={triggerRef}
+              onClick={open}
+              className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-500 text-red-700 transition-colors hover:bg-red-100 dark:border-red-700/60 dark:bg-red-950/20 dark:text-red-400 dark:hover:bg-red-950/30"
+            >
+              <XCircle className="h-4 w-4" aria-hidden="true" />
+              Cancel order
+            </button>
+          </m.div>
+        ) : (
           <m.div
             key="confirm"
+            ref={confirmRef}
+            role="alertdialog"
+            aria-modal="false"
+            aria-labelledby="cancel-dialog-title"
+            aria-describedby="cancel-dialog-desc"
+            tabIndex={-1}
             initial={{ opacity: 0, scale: 0.97, y: 4 }}
             animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: 0.2, ease: [0.23, 1, 0.32, 1] } }}
             exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.15 } }}
-            className="rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/40 dark:bg-red-950/20"
+            className="rounded-xl border border-red-200 bg-red-50 p-4 outline-none dark:border-red-700/60 dark:bg-red-950/20"
+            onKeyDown={(e) => e.key === 'Escape' && close()}
           >
             <div className="flex items-start gap-3">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red-600 dark:text-red-400" aria-hidden="true" />
               <div className="flex-1">
-                <p className="text-sm font-600 text-red-800 dark:text-red-300">
+                <p id="cancel-dialog-title" className="text-sm font-600 text-red-800 dark:text-red-300">
                   Cancel this order?
                 </p>
-                <p className="mt-0.5 text-xs text-red-700 dark:text-red-400">
+                <p id="cancel-dialog-desc" className="mt-0.5 text-xs text-red-700 dark:text-red-400">
                   This cannot be undone. You will receive a confirmation email.
                 </p>
               </div>
@@ -67,16 +99,16 @@ export function CancelOrderButton({ orderId }: Props) {
                 {isPending ? 'Cancelling…' : 'Yes, cancel it'}
               </button>
               <button
-                onClick={() => setShowConfirm(false)}
+                onClick={close}
                 disabled={isPending}
-                className="rounded-lg border border-red-200 bg-white px-4 py-2 text-xs font-600 text-red-700 transition-colors hover:bg-red-50 dark:border-red-900/40 dark:bg-transparent dark:text-red-400"
+                className="rounded-lg border border-red-200 bg-white px-4 py-2 text-xs font-600 text-red-700 transition-colors hover:bg-red-50 dark:border-red-700/60 dark:bg-transparent dark:text-red-400"
               >
                 Keep order
               </button>
             </div>
           </m.div>
-        </AnimatePresence>
-      )}
+        )}
+      </AnimatePresence>
 
       {error && (
         <p className="mt-2 text-xs text-red-600 dark:text-red-400" role="alert">{error}</p>

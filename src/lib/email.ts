@@ -90,6 +90,8 @@ type OrderLike = {
   total: number | string | { toNumber(): number }
   shippingMethod: string | null
   couponCode: string | null
+  trackingNumber?: string | null
+  trackingUrl?: string | null
   address: {
     line1: string; line2?: string | null
     city: string; state: string; postalCode: string
@@ -108,8 +110,9 @@ function addrLines(order: OrderLike): string {
   const a = order.address ?? (order.shippingAddress as Record<string, string> | null)
   if (!a) return ''
   const r = a as Record<string, string>
+  const name = (r.firstName && r.lastName) ? `<strong>${r.firstName} ${r.lastName}</strong><br />` : ''
   const l2 = r.line2 ? `${r.line2}<br />` : ''
-  return `${r.line1}<br />${l2}${r.city}, ${r.state} ${r.postalCode}<br />United States`
+  return `${name}${r.line1}<br />${l2}${r.city}, ${r.state} ${r.postalCode}<br />United States`
 }
 
 const SHIPPING_LABEL: Record<string, string> = {
@@ -119,8 +122,20 @@ const SHIPPING_LABEL: Record<string, string> = {
 }
 
 function itemsTable(items: OrderItem[]): string {
-  const rows = items.map((item) => `
+  const rows = items.map((item) => {
+    const imgUrl = item.product.images[0]?.url
+    const imgCell = imgUrl
+      ? `<td style="width:56px;padding:12px 12px 12px 0;border-bottom:1px solid #eef3f6;vertical-align:top">
+           <img src="${imgUrl}" width="48" height="48" alt="${item.product.name}"
+                style="width:48px;height:48px;object-fit:cover;border-radius:8px;display:block" />
+         </td>`
+      : `<td style="width:56px;padding:12px 12px 12px 0;border-bottom:1px solid #eef3f6;vertical-align:top">
+           <div style="width:48px;height:48px;background:#eef3f6;border-radius:8px"></div>
+         </td>`
+
+    return `
     <tr>
+      ${imgCell}
       <td style="padding:12px 0;border-bottom:1px solid #eef3f6;vertical-align:top">
         <p style="margin:0;font-size:14px;font-weight:600;color:#0d1f2d">${item.product.name}</p>
         ${item.variant ? `<p style="margin:2px 0 0;font-size:12px;color:#5d7d8e">${item.variant.name}: ${item.variant.value}</p>` : ''}
@@ -131,7 +146,8 @@ function itemsTable(items: OrderItem[]): string {
           ${formatUSD(n(item.price) * item.quantity)}
         </span>
       </td>
-    </tr>`).join('')
+    </tr>`
+  }).join('')
 
   return `
     <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="border-top:1px solid #eef3f6">
@@ -297,13 +313,16 @@ export async function sendShippingUpdateEmail({
   const greeting = customerName ? `Hi ${customerName.split(' ')[0]},` : 'Hi there,'
   const carrier  = order.shippingMethod ? (SHIPPING_LABEL[order.shippingMethod] ?? order.shippingMethod) : 'Standard'
 
-  const trackingBlock = trackingNumber
-    ? `<div style="margin-top:20px;padding:16px;background:#e8f8fa;border-radius:10px;border-left:4px solid #1daabc">
-        <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#1a3a4a;text-transform:uppercase;letter-spacing:0.8px">
+  // Prefer explicit params; fall back to values stored on the order row
+  const tn  = trackingNumber ?? order.trackingNumber ?? null
+  const tu  = trackingUrl    ?? order.trackingUrl    ?? null
+  const trackingBlock = tn
+    ? `<div style="margin-top:20px;padding:16px;background:#e8f8fa;border-radius:10px">
+        <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:#37586f;text-transform:uppercase;letter-spacing:0.8px">
           Tracking number
         </p>
-        <p style="margin:0;font-size:16px;font-weight:700;color:#1daabc;font-family:monospace">${trackingNumber}</p>
-        ${trackingUrl ? `<p style="margin:6px 0 0"><a href="${trackingUrl}" style="font-size:13px;color:#1daabc">Track your package →</a></p>` : ''}
+        <p style="margin:0;font-size:16px;font-weight:700;color:#1daabc;font-family:monospace">${tn}</p>
+        ${tu ? `<p style="margin:8px 0 0"><a href="${tu}" style="font-size:13px;color:#1daabc;text-decoration:none">Track your package →</a></p>` : ''}
       </div>`
     : ''
 

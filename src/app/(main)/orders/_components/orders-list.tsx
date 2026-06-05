@@ -4,7 +4,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { m } from 'motion/react'
 import { ShoppingBag, ChevronRight, Package } from 'lucide-react'
-import { formatUSD } from '@/lib/utils'
+import { formatUSD, decimalToNumber } from '@/lib/utils'
 import { staggerContainer, staggerItem } from '@/lib/motion'
 import { OrderStatusBadge } from './order-status-badge'
 
@@ -22,12 +22,6 @@ type OrderRow = {
       images: { url: string }[]
     }
   }[]
-}
-
-function num(v: number | string | { toNumber(): number }): number {
-  if (typeof v === 'number') return v
-  if (typeof v === 'string') return parseFloat(v)
-  return v.toNumber()
 }
 
 interface Props {
@@ -74,6 +68,7 @@ export function OrdersList({ orders }: Props) {
             <Link
               href={`/orders/${order.id}`}
               className="group flex items-center gap-4 rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] p-5 shadow-[var(--shadow-xs)] transition-all duration-200 hover:border-[var(--border-default)] hover:shadow-[var(--shadow-sm)]"
+              aria-label={`Order ${order.id.slice(-8).toUpperCase()}, ${order.items.map(i => i.product.name).join(', ')}, ${order.status.charAt(0) + order.status.slice(1).toLowerCase()}`}
             >
               {/* Thumbnail */}
               <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-[var(--bg-subtle)]">
@@ -98,13 +93,13 @@ export function OrdersList({ orders }: Props) {
               </div>
 
               {/* Info */}
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1" aria-hidden="true">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="font-mono text-xs text-[var(--text-muted)]">
                       #{order.id.slice(-8).toUpperCase()}
                     </p>
-                    <p className="mt-0.5 truncate text-sm font-600 text-[var(--text-primary)]">
+                    <p className="mt-0.5 line-clamp-1 text-sm font-600 text-[var(--text-primary)]">
                       {order.items.map((i) => i.product.name).join(', ')}
                     </p>
                     <p className="mt-0.5 text-xs text-[var(--text-muted)]">
@@ -117,7 +112,7 @@ export function OrdersList({ orders }: Props) {
                   </div>
                   <div className="shrink-0 text-right">
                     <p className="text-sm font-700 tabular-nums text-[var(--text-primary)]">
-                      {formatUSD(num(order.total))}
+                      {formatUSD(decimalToNumber(order.total))}
                     </p>
                     <OrderStatusBadge status={order.status} className="mt-1.5" />
                   </div>

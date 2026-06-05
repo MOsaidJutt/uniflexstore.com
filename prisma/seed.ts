@@ -3,6 +3,14 @@ import { PrismaClient, DiscountType } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import bcrypt from 'bcryptjs'
 
+// Cloudinary-hosted brand logos (in production these are uploaded via admin)
+// Using reliable public CDN URLs for seed / development
+const BRAND_LOGOS = {
+  lenovo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Lenovo_logo_2015.svg/320px-Lenovo_logo_2015.svg.png',
+  fanvil: 'https://www.fanvil.com/Uploads/Fanvil/20230427/logo.png',
+  yealink: 'https://www.yealink.com/upload/images/2022/logo.png',
+}
+
 const connectionString = process.env.DATABASE_DIRECT_URL ?? process.env.DATABASE_URL!
 const adapter = new PrismaPg({ connectionString })
 const db = new PrismaClient({ adapter })
@@ -11,6 +19,7 @@ async function main() {
   console.log('🌱 Seeding UniFlex Store…')
 
   // ─── Cleanup ────────────────────────────────────────────────────────────────
+  await db.brandAuthorization.deleteMany()
   await db.couponUsage.deleteMany()
   await db.reviewImage.deleteMany()
   await db.review.deleteMany()
@@ -484,6 +493,53 @@ async function main() {
   })
 
   console.log('✅ Coupons & banners created')
+
+  // ─── Brand Authorizations ────────────────────────────────────────────────────
+  await db.brandAuthorization.createMany({
+    data: [
+      {
+        brandName: 'Lenovo',
+        brandLogoUrl: BRAND_LOGOS.lenovo,
+        authorizationType: 'Authorized Reseller',
+        certificateAssetUrl: 'https://placehold.co/1200x900/1a3a4a/ffffff?text=Lenovo+Authorized+Reseller+Certificate',
+        verificationUrl: 'https://www.lenovo.com/us/en/findlenovo/',
+        verificationNote: 'Enter our business name "UniFlex Global" in the Lenovo partner locator.',
+        validFrom: new Date('2024-01-01'),
+        validUntil: new Date('2027-01-01'),
+        displayBlurb: 'As a Lenovo Authorized Reseller, every Lenovo product we sell is brand-new, sealed, and covered by Lenovo\'s full manufacturer warranty.',
+        sortOrder: 1,
+        isPublished: true,
+      },
+      {
+        brandName: 'Yealink',
+        brandLogoUrl: BRAND_LOGOS.yealink,
+        authorizationType: 'Authorized Dealer',
+        certificateAssetUrl: 'https://placehold.co/1200x900/0066cc/ffffff?text=Yealink+Authorized+Dealer+Certificate',
+        verificationUrl: 'https://www.yealink.com/en/channel-partner/',
+        verificationNote: 'Search for "UniFlex" in the Yealink official partner directory.',
+        validFrom: new Date('2024-06-01'),
+        validUntil: new Date('2026-12-31'),
+        displayBlurb: 'Yealink Authorized Dealer status ensures every IP phone and collaboration device ships with full firmware support and manufacturer warranty.',
+        sortOrder: 2,
+        isPublished: true,
+      },
+      {
+        brandName: 'Fanvil',
+        brandLogoUrl: BRAND_LOGOS.fanvil,
+        authorizationType: 'Authorized Reseller',
+        certificateAssetUrl: 'https://placehold.co/1200x900/e8341c/ffffff?text=Fanvil+Authorized+Reseller+Certificate',
+        verificationUrl: null,
+        verificationNote: null,
+        validFrom: new Date('2025-01-01'),
+        validUntil: new Date('2027-06-30'),
+        displayBlurb: 'Fanvil Authorized Reseller — certificate on file. All Fanvil VoIP devices we sell are genuine, brand-new, and backed by Fanvil\'s 2-year warranty.',
+        sortOrder: 3,
+        isPublished: true,
+      },
+    ],
+  })
+
+  console.log('✅ Brand authorizations created')
   console.log('\n🎉 Seed complete! 20 products across 4 categories.')
   console.log('\n📋 Test accounts:')
   console.log('  Admin  → admin@uniflexstore.com  / Admin@1234')

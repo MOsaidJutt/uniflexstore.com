@@ -12,6 +12,12 @@ export function formatUSD(amount: number): string {
   }).format(amount)
 }
 
+export function decimalToNumber(v: number | string | { toNumber(): number }): number {
+  if (typeof v === 'number') return v
+  if (typeof v === 'string') return parseFloat(v)
+  return v.toNumber()
+}
+
 export function slugify(str: string): string {
   return str
     .toLowerCase()

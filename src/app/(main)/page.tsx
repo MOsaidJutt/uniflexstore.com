@@ -1,6 +1,8 @@
 import { db } from '@/server/db'
 import { HeroSection } from './_components/hero-section'
 import { CategoryGrid } from './_components/category-grid'
+import { AuthorizedSection } from './_components/authorized-section'
+import { getActiveAuthorizations } from '@/server/queries/brand-authorizations'
 
 async function getOrbitImages() {
   const products = await db.product.findMany({
@@ -15,11 +17,17 @@ async function getOrbitImages() {
 }
 
 export default async function HomePage() {
-  const orbitImages = await getOrbitImages()
+  const [orbitImages, authorizations] = await Promise.all([
+    getOrbitImages(),
+    getActiveAuthorizations(),
+  ])
 
   return (
     <div className="flex-1">
       <HeroSection orbitImages={orbitImages} />
+
+      {/* Authorized reseller section — immediately below hero */}
+      <AuthorizedSection authorizations={authorizations} />
 
       {/* Trust strip */}
       <div className="border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)]">

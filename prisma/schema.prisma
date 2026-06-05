@@ -306,6 +306,8 @@ model Order {
   addressId       String?
   // Snapshot of shipping address for guest orders (no Address row)
   shippingAddress Json?
+  trackingNumber  String?
+  trackingUrl     String?
 
   user          User?          @relation(fields: [userId], references: [id])
   items         OrderItem[]
@@ -419,6 +421,29 @@ model ReturnRequest {
 
   @@index([orderId])
   @@index([userId])
+}
+
+// ─── Brand Authorizations ─────────────────────────────────────────────
+
+model BrandAuthorization {
+  id                  String    @id @default(cuid())
+  brandName           String
+  brandLogoUrl        String
+  authorizationType   String
+  certificateAssetUrl String
+  verificationUrl     String?
+  verificationNote    String?
+  validFrom           DateTime?
+  validUntil          DateTime?
+  displayBlurb        String?
+  sortOrder           Int       @default(0)
+  isPublished         Boolean   @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([brandName])
+  @@index([isPublished])
 }
 
 // ─── Banners ──────────────────────────────────────────────────────────

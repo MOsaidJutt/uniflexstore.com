@@ -1,5 +1,6 @@
 import { db } from '@/server/db'
 import { HeroSection } from './_components/hero-section'
+import { BannerStrip } from './_components/banner-strip'
 import { CategoryGrid } from './_components/category-grid'
 import { AuthorizedSection } from './_components/authorized-section'
 import { getActiveAuthorizations } from '@/server/queries/brand-authorizations'
@@ -16,15 +17,30 @@ async function getOrbitImages() {
     .filter((img) => img.src.length > 0)
 }
 
+async function getActiveBanners() {
+  const now = new Date()
+  return db.banner.findMany({
+    where: {
+      isActive: true,
+      OR: [{ startsAt: null }, { startsAt: { lte: now } }],
+      AND: [{ OR: [{ endsAt: null }, { endsAt: { gt: now } }] }],
+    },
+    orderBy: { sortOrder: 'asc' },
+    select: { id: true, title: true, subtitle: true, imageUrl: true, linkUrl: true, linkLabel: true },
+  })
+}
+
 export default async function HomePage() {
-  const [orbitImages, authorizations] = await Promise.all([
+  const [orbitImages, authorizations, banners] = await Promise.all([
     getOrbitImages(),
     getActiveAuthorizations(),
+    getActiveBanners(),
   ])
 
   return (
     <div className="flex-1">
       <HeroSection orbitImages={orbitImages} />
+      {banners.length > 0 && <BannerStrip banners={banners} />}
 
       {/* Authorized reseller section — immediately below hero */}
       <AuthorizedSection authorizations={authorizations} />

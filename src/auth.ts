@@ -70,13 +70,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    jwt({ token, user, account }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id
         token.role = user.role ?? 'CUSTOMER'
         // OAuth always gets 30 days; credentials respects the remember-me checkbox.
         const days = account || user.rememberMe !== false ? 30 : 1
         token.sessionEnd = Date.now() + days * 24 * 60 * 60 * 1000
+      }
+      // Re-check ban status on every token refresh so bans take effect within one refresh cycle
+      if (token.id) {
+        const dbUser = await db.user.findUnique({ where: { id: token.id as string }, select: { isBanned: true } })
+        if (dbUser?.isBanned) return null
       }
       return token
     },

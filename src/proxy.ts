@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { auth } from '@/auth'
 
-const PROTECTED = ['/account']
+const PROTECTED = ['/account', '/orders']
+const ADMIN_ROUTES = ['/admin']
 const AUTH_ONLY = ['/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password']
 
 export async function proxy(request: NextRequest) {
@@ -16,13 +17,21 @@ export async function proxy(request: NextRequest) {
   const sessionExpired = sessionEnd && sessionEnd < Date.now()
 
   const isProtected = PROTECTED.some((p) => pathname.startsWith(p))
+  const isAdminRoute = ADMIN_ROUTES.some((p) => pathname.startsWith(p))
   const isAuthRoute = AUTH_ONLY.some((p) => pathname.startsWith(p))
 
-  if (isProtected && (!isLoggedIn || sessionExpired)) {
+  if ((isProtected || isAdminRoute) && (!isLoggedIn || sessionExpired)) {
     const url = request.nextUrl.clone()
     url.pathname = '/auth/login'
     url.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(url)
+  }
+
+  if (isAdminRoute && isLoggedIn && !sessionExpired) {
+    const role = session?.user?.role
+    if (role !== 'ADMIN' && role !== 'SUPER_ADMIN') {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
   }
 
   if (isAuthRoute && isLoggedIn && !sessionExpired) {

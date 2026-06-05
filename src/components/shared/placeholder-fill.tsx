@@ -10,19 +10,17 @@ import { ClipboardPen } from 'lucide-react'
 
 const SELECTORS = 'input[placeholder]:not([disabled]), textarea[placeholder]:not([disabled])'
 
-// Native value setters — required to trigger React's synthetic onChange
-const inputSetter  = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,  'value')?.set
-const textAreaSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set
-
 function fillPlaceholders(): number {
+  // Native value setters resolved here — browser-only, never called during SSR
+  const inputSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')?.set
+  const textAreaSetter = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')?.set
+
   const fields = Array.from(document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(SELECTORS))
   let filled = 0
 
   for (const el of fields) {
     const placeholder = el.placeholder
     if (!placeholder) continue
-
-    // Skip password fields — placeholder is usually unhelpful
     if ((el as HTMLInputElement).type === 'password') continue
 
     const setter = el instanceof HTMLTextAreaElement ? textAreaSetter : inputSetter

@@ -30,15 +30,16 @@ The design bar is a "million-dollar retail flagship" — the layout precision of
 |-------|-------|------|-----|
 | `--brand-primary` | `#1a3a4a` | `#1a3a4a` | Primary buttons, logo area, footer bg |
 | `--brand-secondary` | `#2d5468` | `#2d5468` | Hover state for primary buttons |
-| `--brand-accent` | `#1daabc` | `#29c4d9` | CTAs, links, active states, badges |
+| `--brand-accent` | `#1daabc` | `#29c4d9` | CTAs, icons, active states, badges — NOT for body text links |
 | `--brand-accent-hover` | `#1590a2` | `#1daabc` | Hover state for accent |
+| `--brand-link` | `#0b6475` | `#29c4d9` | Body text hyperlinks (6.5:1 on bg-base, 6.1:1 on bg-subtle) |
 | `--brand-teal-light` | `#e0f5f8` | `#0f2e38` | Subtle teal backgrounds (selected states, banners) |
 | `--bg-base` | `#f8fafb` | `#0a1520` | Page background |
 | `--bg-subtle` | `#eef3f6` | `#0f2030` | Card backgrounds, form inputs |
 | `--bg-muted` | `#dce8ed` | `#1a3040` | Disabled states, progress bars |
 | `--text-primary` | `#0d1f2d` | `#e8f4f8` | Headings, body (17:1 on bg-base) |
 | `--text-secondary` | `#37586f` | `#a8cad5` | Supporting text (7.1:1) |
-| `--text-muted` | `#5d7d8e` | `#7aa0ae` | Captions (4.6:1 verified) |
+| `--text-muted` | `#506e7e` | `#7aa0ae` | Captions (5.2:1 on bg-base) |
 | `--border-subtle` | `#dce8ed` | `#0f2030` | Dividers, card borders |
 | `--border-default` | `#c8d8df` | `#1a3040` | Input borders |
 | `--success` | `#059669` | `#059669` | Success states |
@@ -68,4 +69,4 @@ The design bar is a "million-dollar retail flagship" — the layout precision of
 | 5 — Admin | Pending | /admin/* surfaces |
 | 6 — Chatbot | Pending | Floating Claude-powered widget |
 | 7 — Polish | Pending | impeccable polish pass on all surfaces |
-| 8 — SEO + Perf | Pending | sitemap, robots, Core Web Vitals |
+| 8 — Launch Hardening | ✅ Done | sitemap, robots, JSON-LD, skip nav, cookie consent, legal pages, Playwright e2e, VPS runbook |

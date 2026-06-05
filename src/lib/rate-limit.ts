@@ -68,3 +68,9 @@ export async function checkThreadRate(): Promise<boolean> {
   const ip = await getIp()
   return check(`thread:${ip}`, 60, 60 * 60 * 1000)
 }
+
+/** 20 agent action confirmations per 5 minutes per IP */
+export async function checkActionRate(): Promise<boolean> {
+  const ip = await getIp()
+  return check(`action:${ip}`, 20, 5 * 60 * 1000)
+}

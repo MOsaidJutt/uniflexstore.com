@@ -5,17 +5,21 @@ import type { Metadata } from 'next'
 import { ChevronRight, Truck, Shield, RotateCcw } from 'lucide-react'
 import { getProductBySlug, getRelatedProducts, getAllProductSlugs } from '@/server/actions/catalog'
 import { BrandAuthBadge } from '@/components/catalog/brand-auth-badge'
-
-export async function generateStaticParams() {
-  const slugs = await getAllProductSlugs()
-  return slugs.map((slug) => ({ slug }))
-}
 import { ProductGallery } from '@/components/catalog/product-gallery'
 import { ReviewSection } from '@/components/catalog/review-section'
 import { ProductGrid } from '@/components/catalog/product-grid'
 import { StarRating } from '@/components/catalog/star-rating'
 import { Reveal } from '@/components/shared/reveal'
+import { JsonLd } from '@/components/shared/json-ld'
+import { siteConfig } from '@/config/site'
 import { PDPActions } from './_components/pdp-actions'
+
+export const revalidate = 3600
+
+export async function generateStaticParams() {
+  const slugs = await getAllProductSlugs()
+  return slugs.map((slug) => ({ slug }))
+}
 
 interface Params {
   slug: string
@@ -29,12 +33,39 @@ export async function generateMetadata({
   const { slug } = await params
   const product = await getProductBySlug(slug)
   if (!product) return {}
+
+  const primaryCategory = product.categories[0]?.category
+  const canonicalUrl = `${siteConfig.url}/products/${slug}`
+  const ogImage = product.images[0]?.url
+
   return {
     title: `${product.name} — UniFlex Global`,
-    description: product.description ?? undefined,
-    openGraph: product.images[0]
-      ? { images: [{ url: product.images[0].url }] }
-      : undefined,
+    description: product.description
+      ? product.description.slice(0, 160)
+      : `Buy ${product.name} from UniFlex Global — authorized US retailer with free shipping and 30-day returns.`,
+    alternates: { canonical: canonicalUrl },
+    openGraph: {
+      type: 'website',
+      url: canonicalUrl,
+      title: product.name,
+      description: product.description?.slice(0, 200) ?? undefined,
+      images: ogImage
+        ? [{ url: ogImage, width: 1200, height: 630, alt: product.name }]
+        : undefined,
+      siteName: siteConfig.name,
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: product.name,
+      description: product.description?.slice(0, 200) ?? undefined,
+      images: ogImage ? [ogImage] : undefined,
+    },
+    other: {
+      'product:price:amount': String(product.price),
+      'product:price:currency': 'USD',
+      'product:availability': product.stock > 0 ? 'in stock' : 'out of stock',
+      'product:category': primaryCategory?.name ?? '',
+    },
   }
 }
 
@@ -48,8 +79,85 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
 
   const related = await getRelatedProducts(product.id, parentSlug, 4)
 
+  // ── Structured data ──────────────────────────────────────────────────────
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: product.description ?? undefined,
+    sku: product.sku,
+    image: product.images.map((img) => img.url),
+    url: `${siteConfig.url}/products/${product.slug}`,
+    brand: primaryCategory?.parent?.name
+      ? { '@type': 'Brand', name: primaryCategory.parent.name }
+      : undefined,
+    offers: {
+      '@type': 'Offer',
+      url: `${siteConfig.url}/products/${product.slug}`,
+      priceCurrency: 'USD',
+      price: String(product.price),
+      priceValidUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
+      availability:
+        product.stock > 0
+          ? 'https://schema.org/InStock'
+          : 'https://schema.org/OutOfStock',
+      seller: {
+        '@type': 'Organization',
+        name: siteConfig.name,
+        url: siteConfig.url,
+      },
+    },
+    ...(product.reviewCount > 0
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: String(product.avgRating.toFixed(1)),
+            reviewCount: String(product.reviewCount),
+            bestRating: '5',
+            worstRating: '1',
+          },
+        }
+      : {}),
+  }
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteConfig.url },
+      ...(primaryCategory?.parent
+        ? [
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: primaryCategory.parent.name,
+              item: `${siteConfig.url}/categories/${primaryCategory.parent.slug}`,
+            },
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: primaryCategory.name,
+              item: `${siteConfig.url}/categories/${primaryCategory.slug}`,
+            },
+            { '@type': 'ListItem', position: 4, name: product.name },
+          ]
+        : primaryCategory
+          ? [
+              {
+                '@type': 'ListItem',
+                position: 2,
+                name: primaryCategory.name,
+                item: `${siteConfig.url}/categories/${primaryCategory.slug}`,
+              },
+              { '@type': 'ListItem', position: 3, name: product.name },
+            ]
+          : [{ '@type': 'ListItem', position: 2, name: product.name }]),
+    ],
+  }
+
   return (
     <div className="mx-auto max-w-[1440px] px-4 py-10 sm:px-6 lg:px-8">
+      <JsonLd data={[productJsonLd, breadcrumbJsonLd]} />
       {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" className="mb-8">
         <ol className="flex flex-wrap items-center gap-1.5 text-sm text-[var(--text-muted)]">

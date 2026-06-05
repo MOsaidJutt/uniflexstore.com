@@ -10,6 +10,7 @@ import {
 } from '@/server/actions/cart'
 import { cancelOrder, submitReturnRequest } from '@/server/actions/orders'
 import { validateCoupon } from '@/server/actions/checkout'
+import { checkActionRate } from '@/lib/rate-limit'
 
 // ─── Sanity limits ─────────────────────────────────────────────────────────────
 
@@ -42,6 +43,14 @@ function logAction(userId: string | null, action: string, params: unknown, resul
 // ─── Handler ───────────────────────────────────────────────────────────────────
 
 export async function POST(req: Request) {
+  const allowed = await checkActionRate()
+  if (!allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please wait a moment.' },
+      { status: 429, headers: { 'Retry-After': '60' } }
+    )
+  }
+
   const session = await auth()
   const userId = session?.user?.id ?? null
 

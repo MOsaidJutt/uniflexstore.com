@@ -4,6 +4,8 @@ import { ThemeProvider } from '@/components/shared/theme-provider'
 import { MotionProvider } from '@/components/shared/motion-provider'
 import { PlaceholderFill } from '@/components/shared/placeholder-fill'
 import { ChatWidget } from '@/components/chat/chat-widget'
+import { SkipToMain } from '@/components/shared/skip-to-main'
+import { CookieConsent } from '@/components/shared/cookie-consent'
 import { getSession } from '@/lib/dal'
 import { siteConfig } from '@/config/site'
 import './globals.css'
@@ -82,10 +84,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           disableTransitionOnChange={false}
         >
           <MotionProvider>
+            <SkipToMain />
             {children}
             <PlaceholderFill />
             {/* Chat widget mounts here once and persists across all client-side navigation */}
             <ChatWidget userId={userId} />
+            <CookieConsent />
           </MotionProvider>
         </ThemeProvider>
       </body>

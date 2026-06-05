@@ -1,6 +1,8 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+
+export const revalidate = 1800
 import { ChevronRight } from 'lucide-react'
 import { getCategoryBySlug, getProducts } from '@/server/actions/catalog'
 import { ProductGrid } from '@/components/catalog/product-grid'

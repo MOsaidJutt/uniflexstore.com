@@ -1,7 +1,15 @@
+// To enable Sentry, uncomment the import and withSentryConfig wrapper below.
+// Requires: npm install @sentry/nextjs
+// import { withSentryConfig } from '@sentry/nextjs'
+
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  compress: true,
+
   images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 3600,
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: 'images.unsplash.com' },
@@ -51,5 +59,15 @@ const nextConfig: NextConfig = {
     ]
   },
 }
+
+// Wrap with Sentry once @sentry/nextjs is installed:
+// export default withSentryConfig(nextConfig, {
+//   org: 'your-sentry-org',
+//   project: 'uniflexstore',
+//   silent: true,
+//   widenClientFileUpload: true,
+//   hideSourceMaps: true,
+//   disableLogger: true,
+// })
 
 export default nextConfig

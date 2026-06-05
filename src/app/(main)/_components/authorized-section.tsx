@@ -30,7 +30,7 @@ function HomeAuthCard({ auth }: { auth: BrandAuthRecord }) {
         className="group flex flex-col rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] p-8"
       >
         {/* Auth type label */}
-        <span className="mb-6 inline-flex w-fit items-center gap-1.5 rounded-full bg-[var(--brand-accent)]/10 px-3 py-1 text-[11px] font-700 uppercase tracking-wider text-[var(--brand-accent)]">
+        <span className="mb-6 inline-flex w-fit items-center gap-1.5 rounded-full bg-[var(--brand-accent)]/10 px-3 py-1 text-[11px] font-700 text-[var(--brand-accent)]">
           <ShieldCheck className="h-3 w-3" aria-hidden="true" />
           {auth.authorizationType}
         </span>

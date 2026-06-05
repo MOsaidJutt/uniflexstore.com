@@ -121,12 +121,12 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
           {/* Name */}
           <div>
             <h1
-              className="font-serif text-3xl font-600 leading-tight text-[var(--text-primary)] sm:text-4xl"
-              style={{ viewTransitionName: `product-title-${product.slug}` }}
+              className="font-serif text-3xl font-semibold leading-[1.1] tracking-tight text-[var(--text-primary)] sm:text-[2.5rem]"
+              style={{ viewTransitionName: `product-title-${product.slug}`, textWrap: 'balance' } as React.CSSProperties}
             >
               {product.name}
             </h1>
-            <p className="mt-1 text-sm text-[var(--text-muted)]">SKU: {product.sku}</p>
+            <p className="mt-2 text-xs text-[var(--text-muted)]">SKU: {product.sku}</p>
           </div>
 
           {/* Rating */}
@@ -154,7 +154,7 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
                 .slice(0, 6)
                 .map(([key, val]) => (
                   <div key={key} className="rounded-lg bg-[var(--bg-subtle)] px-3 py-2">
-                    <dt className="text-[11px] font-600 uppercase tracking-wider text-[var(--text-muted)]">
+                    <dt className="text-[11px] font-600 text-[var(--text-muted)]">
                       {key.replace(/([A-Z])/g, ' $1').trim()}
                     </dt>
                     <dd className="mt-0.5 text-sm font-500 text-[var(--text-primary)]">
@@ -183,18 +183,18 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
           </Suspense>
 
           {/* Trust signals */}
-          <div className="grid grid-cols-3 gap-2 border-t border-[var(--border-subtle)] pt-6">
+          <div className="flex flex-wrap gap-x-6 gap-y-3 border-t border-[var(--border-subtle)] pt-6">
             {[
-              { icon: Truck, label: 'Free Shipping', sub: 'Orders over $49' },
-              { icon: Shield, label: 'Secure Checkout', sub: 'SSL encrypted' },
-              { icon: RotateCcw, label: 'Free Returns', sub: '30-day policy' },
+              { icon: Truck, label: 'Free shipping', sub: 'Orders $49+' },
+              { icon: Shield, label: 'Secure checkout', sub: 'SSL encrypted' },
+              { icon: RotateCcw, label: 'Free returns', sub: '30-day policy' },
             ].map(({ icon: Icon, label, sub }) => (
-              <div key={label} className="flex flex-col items-center gap-2 rounded-xl bg-[var(--bg-subtle)] px-2 py-3 text-center">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--brand-accent)]/10">
-                  <Icon className="h-4 w-4 text-[var(--brand-accent)]" aria-hidden="true" />
+              <div key={label} className="flex items-center gap-2.5">
+                <Icon className="h-4 w-4 shrink-0 text-[var(--brand-accent)]" aria-hidden="true" />
+                <div>
+                  <span className="block text-xs font-600 text-[var(--text-primary)]">{label}</span>
+                  <span className="block text-[11px] text-[var(--text-muted)]">{sub}</span>
                 </div>
-                <span className="text-xs font-600 text-[var(--text-primary)]">{label}</span>
-                <span className="text-[11px] text-[var(--text-muted)]">{sub}</span>
               </div>
             ))}
           </div>
@@ -213,8 +213,8 @@ export default async function ProductPage({ params }: { params: Promise<Params> 
       {/* Related products */}
       {related.length > 0 && (
         <Reveal as="section" className="mt-16 border-t border-[var(--border-subtle)] pt-12">
-          <h2 className="mb-8 font-serif text-2xl font-600 text-[var(--text-primary)]">
-            You Might Also Like
+          <h2 className="mb-8 font-serif text-2xl font-600 leading-tight text-[var(--text-primary)]">
+            You might also like
           </h2>
           <ProductGrid products={related} columns={4} />
         </Reveal>

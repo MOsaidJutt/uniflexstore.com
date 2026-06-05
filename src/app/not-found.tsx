@@ -39,7 +39,7 @@ export default function NotFound() {
       </div>
 
       <nav aria-label="Popular categories" className="mt-12">
-        <p className="mb-4 text-xs font-medium uppercase tracking-widest text-[var(--text-muted)]">
+        <p className="mb-4 text-sm font-600 text-[var(--text-secondary)]">
           Popular categories
         </p>
         <ul className="flex flex-wrap justify-center gap-2" role="list">

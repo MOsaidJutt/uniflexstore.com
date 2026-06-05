@@ -39,7 +39,7 @@ export function AccountShell({ user, initials, joinDate }: Props) {
               <p className="font-600 text-[var(--text-primary)]">{user.name ?? 'Customer'}</p>
               <p className="mt-0.5 text-xs text-[var(--text-muted)]">{user.email}</p>
             </div>
-            <p className="mt-1.5 text-center text-[10px] font-500 uppercase tracking-widest text-[var(--text-muted)]">
+            <p className="mt-1.5 text-center text-[11px] text-[var(--text-muted)]">
               Member since {joinDate}
             </p>
           </div>
@@ -82,7 +82,7 @@ export function AccountShell({ user, initials, joinDate }: Props) {
                       <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                       {label}
                     </span>
-                    <span className="rounded-md bg-[var(--bg-muted)] px-1.5 py-0.5 text-[9px] font-700 uppercase tracking-wider text-[var(--text-muted)]">
+                    <span className="rounded-md bg-[var(--bg-muted)] px-1.5 py-0.5 text-[9px] font-700 text-[var(--text-muted)]">
                       Soon
                     </span>
                   </span>

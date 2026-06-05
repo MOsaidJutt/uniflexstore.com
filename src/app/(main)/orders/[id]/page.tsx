@@ -87,8 +87,8 @@ export default async function OrderDetailPage({
             {/* Tracking info — shown when shipped */}
             {order.status === 'SHIPPED' && order.trackingNumber && (
               <div className="mt-5 rounded-xl bg-[var(--brand-teal-light)] px-4 py-3.5">
-                <p className="text-xs font-700 uppercase tracking-wider text-[var(--brand-accent)]">
-                  Tracking
+                <p className="text-xs font-700 text-[var(--brand-accent)]">
+                  Tracking number
                 </p>
                 <p className="mt-1 font-mono text-sm font-600 text-[var(--text-primary)]">
                   {order.trackingNumber}
@@ -185,7 +185,7 @@ export default async function OrderDetailPage({
                 <dd className="tabular-nums">{formatUSD(Number(order.subtotal))}</dd>
               </div>
               {Number(order.discount) > 0 && (
-                <div className="flex justify-between text-emerald-600 dark:text-emerald-400">
+                <div className="flex justify-between text-[var(--text-success)]">
                   <dt>Discount{order.couponCode && ` (${order.couponCode})`}</dt>
                   <dd className="tabular-nums">−{formatUSD(Number(order.discount))}</dd>
                 </div>

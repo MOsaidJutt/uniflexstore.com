@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, ShieldCheck, PackageCheck, FileCheck } from 'lucide-react'
 import { getActiveAuthorizations } from '@/server/queries/brand-authorizations'
 import { Reveal } from '@/components/shared/reveal'
 import { BrandAuthGrid } from './_components/brand-auth-grid'
@@ -18,7 +18,7 @@ export default async function AuthorizedResellerPage() {
   return (
     <div className="mx-auto max-w-[1440px] px-4 py-12 sm:px-6 lg:px-8">
 
-      {/* Back link — above the fold, no Reveal */}
+      {/* Back link */}
       <Link
         href="/"
         className="mb-10 inline-flex items-center gap-1.5 text-sm text-[var(--text-muted)] transition-colors hover:text-[var(--brand-accent)]"
@@ -27,7 +27,7 @@ export default async function AuthorizedResellerPage() {
         Back to home
       </Link>
 
-      {/* Page header — above the fold, renders immediately */}
+      {/* Page header */}
       <div className="mb-6 max-w-2xl">
         <h1
           className="font-serif text-4xl font-700 leading-tight text-[var(--text-primary)] sm:text-5xl"
@@ -50,21 +50,42 @@ export default async function AuthorizedResellerPage() {
         </p>
       </div>
 
-      {/* Guarantee strip — horizontal, no icon-above-template */}
-      <div className="mb-14 flex flex-wrap gap-x-10 gap-y-3 border-y border-[var(--border-subtle)] py-5">
+      {/* Guarantee strip — horizontal with icons */}
+      <Reveal
+        as="div"
+        className="mb-14 grid grid-cols-1 gap-4 border-y border-[var(--border-subtle)] py-8 sm:grid-cols-3"
+        threshold={0.2}
+      >
         {[
-          { label: 'Brand-new only', detail: 'Zero refurbished or gray-market stock, ever.' },
-          { label: "Manufacturer's warranty", detail: 'Full factory coverage on every item we sell.' },
-          { label: 'Certificates on file', detail: 'Current authorization documents, available on request.' },
-        ].map(({ label, detail }) => (
-          <div key={label} className="flex items-baseline gap-2">
-            <span className="text-sm font-700 text-[var(--text-primary)]">{label}</span>
-            <span className="text-sm text-[var(--text-muted)]">{detail}</span>
+          {
+            icon: PackageCheck,
+            label: 'Brand-new only',
+            detail: 'Zero refurbished or gray-market stock.',
+          },
+          {
+            icon: ShieldCheck,
+            label: "Manufacturer's warranty",
+            detail: 'Full factory coverage on every item.',
+          },
+          {
+            icon: FileCheck,
+            label: 'Certificates on file',
+            detail: 'Current authorization documents, available on request.',
+          },
+        ].map(({ icon: Icon, label, detail }) => (
+          <div key={label} className="flex items-start gap-4">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[var(--brand-accent)]/10">
+              <Icon className="h-[18px] w-[18px] text-[var(--brand-accent)]" aria-hidden="true" />
+            </div>
+            <div>
+              <p className="text-sm font-700 text-[var(--text-primary)]">{label}</p>
+              <p className="mt-0.5 text-sm text-[var(--text-muted)]">{detail}</p>
+            </div>
           </div>
         ))}
-      </div>
+      </Reveal>
 
-      {/* Authorization grid — below fold, reveal is appropriate here */}
+      {/* Authorization grid */}
       {authorizations.length > 0 ? (
         <BrandAuthGrid authorizations={authorizations} />
       ) : (

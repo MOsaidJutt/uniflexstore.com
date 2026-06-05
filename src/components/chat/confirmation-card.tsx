@@ -95,7 +95,7 @@ export function ConfirmationCard({ proposal, reduced, onConfirm, onCancel, onSuc
       animate="visible"
       exit="exit"
       transition={reduced ? INSTANT : undefined}
-      className="mx-4 overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] shadow-sm"
+      className="mx-4 overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] shadow-[0_4px_16px_-4px_rgba(10,21,32,0.15),0_0_0_1px_rgba(29,170,188,0.06)]"
     >
       {/* Header strip */}
       <div

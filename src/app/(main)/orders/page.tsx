@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { requireAuth } from '@/lib/dal'
 import { getOrders } from '@/server/queries/orders'
 import { OrdersList } from './_components/orders-list'
+import { Reveal } from '@/components/shared/reveal'
 
 export const metadata: Metadata = { title: 'My orders' }
 
@@ -24,7 +25,7 @@ export default async function OrdersPage({
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-      <div className="mb-8">
+      <Reveal as="div" className="mb-8" threshold={0.1}>
         <h1 className="font-serif text-3xl font-600 text-[var(--text-primary)]">My orders</h1>
         <p className="mt-1 text-sm text-[var(--text-muted)]">
           {total === 0
@@ -33,7 +34,7 @@ export default async function OrdersPage({
               ? '1 order'
               : `${total} orders`}
         </p>
-      </div>
+      </Reveal>
 
       <OrdersList orders={orders} />
 

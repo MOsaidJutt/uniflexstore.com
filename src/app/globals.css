@@ -32,6 +32,7 @@
   --warning: #d97706;
   --error: #dc2626;
   --info: #2563eb;
+  --text-success: #059669;
 
   /* Shadows */
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -113,6 +114,7 @@
   --brand-accent: #29c4d9;
   --brand-accent-hover: #1daabc;
   --brand-teal-light: #0f2e38;
+  --text-success: #34d399;
 
   --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 0.4);
   --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.5), 0 1px 2px -1px rgb(0 0 0 / 0.5);
@@ -227,13 +229,45 @@ button:not([disabled]):not([data-no-press]):active,
 }
 
 /* ─── View Transitions ──────────────────────────────────── */
+/* No-JS fallback: motion/react renders opacity:0 server-side; restore without scripting */
+@media (scripting: none) {
+  [style*="opacity: 0"],
+  [style*="opacity:0"] {
+    opacity: 1 !important;
+  }
+  [style*="translateY"],
+  [style*="scale(0"] {
+    transform: none !important;
+  }
+}
+
 @view-transition {
   navigation: auto;
 }
 
-::view-transition-old(root),
+@keyframes vt-fade-out {
+  from { opacity: 1; transform: translateY(0); filter: blur(0px); }
+  to   { opacity: 0; transform: translateY(-6px); filter: blur(2px); }
+}
+
+@keyframes vt-fade-in {
+  from { opacity: 0; transform: translateY(8px); filter: blur(2px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0px); }
+}
+
+::view-transition-old(root) {
+  animation: vt-fade-out 0.22s cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
 ::view-transition-new(root) {
-  animation-duration: 0.3s;
+  animation: vt-fade-in 0.36s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.01ms !important;
+  }
 }
 
 /* ─── Animations ────────────────────────────────────────── */
@@ -334,3 +368,22 @@ button:not([disabled]):not([data-no-press]):active,
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+/* Clip-path reveal: content slides up from below its own container edge */
+@keyframes clip-reveal-up {
+  from { clip-path: inset(100% 0 0 0); opacity: 0; }
+  to   { clip-path: inset(0% 0 0 0);   opacity: 1; }
+}
+
+/* Scale-in for cards and modals */
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+/* Teal glow pulse — branded hero accent */
+@keyframes glow-teal {
+  0%, 100% { box-shadow: 0 0 0 0 transparent; }
+  50%       { box-shadow: 0 0 32px 8px color-mix(in srgb, var(--brand-accent) 30%, transparent); }
+}
+

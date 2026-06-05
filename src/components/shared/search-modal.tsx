@@ -23,6 +23,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
   const [loading, setLoading] = useState(false)
+  const [selectedIndex, setSelectedIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -38,15 +39,26 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
     }
   }, [open])
 
-  // Keyboard close
+  // Keyboard: Escape closes; ArrowDown/Up move through suggestions; Enter selects
   useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') { onClose(); return }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault()
+        setSelectedIndex(prev => Math.min(prev + 1, suggestions.length - 1))
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault()
+        setSelectedIndex(prev => Math.max(prev - 1, -1))
+      } else if (e.key === 'Enter' && selectedIndex >= 0 && suggestions[selectedIndex]) {
+        e.preventDefault()
+        router.push(suggestions[selectedIndex].href)
+        onClose()
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [open, onClose])
+  }, [open, onClose, suggestions, selectedIndex, router])
 
   // Focus trap
   useEffect(() => {
@@ -92,6 +104,11 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
       if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [query])
+
+  // Reset keyboard selection when the suggestions list is replaced
+  useEffect(() => {
+    setSelectedIndex(-1)
+  }, [suggestions])
 
   const handleSubmit = useCallback(
     (e?: React.FormEvent) => {
@@ -144,6 +161,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                     aria-label="Search"
                     aria-autocomplete="list"
                     aria-controls="search-suggestions"
+                    aria-activedescendant={selectedIndex >= 0 ? `search-option-${selectedIndex}` : undefined}
                     className="flex-1 bg-transparent text-sm text-[var(--text-primary)] placeholder:text-[var(--text-muted)] focus:outline-none"
                   />
                   {loading && (
@@ -175,7 +193,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
               {/* Quick links — no query */}
               {!query && (
                 <div className="p-4">
-                  <p className="mb-3 text-[11px] font-600 uppercase tracking-widest text-[var(--text-muted)]">
+                  <p className="mb-3 text-xs font-600 text-[var(--text-secondary)]">
                     Browse categories
                   </p>
                   <div className="grid grid-cols-2 gap-2">
@@ -197,14 +215,17 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
               {/* Suggestions */}
               {query && suggestions.length > 0 && (
                 <ul id="search-suggestions" role="listbox" className="py-2">
-                  {suggestions.map((s) => (
-                    <li key={s.href}>
+                  {suggestions.map((s, i) => (
+                    <li
+                      key={s.href}
+                      id={`search-option-${i}`}
+                      role="option"
+                      aria-selected={i === selectedIndex}
+                    >
                       <a
                         href={s.href}
-                        role="option"
-                        aria-selected="false"
                         onClick={onClose}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-[var(--bg-subtle)]"
+                        className={`flex items-center gap-3 px-4 py-2.5 text-sm transition-colors ${i === selectedIndex ? 'bg-[var(--bg-subtle)]' : 'hover:bg-[var(--bg-subtle)]'}`}
                       >
                         {s.type === 'product' && s.image ? (
                           <Image

@@ -113,8 +113,8 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-[var(--text-muted)]">
-              Premium multi-category shopping for everyday life. Quality you can trust,
-              delivered to your door.
+              Electronics, fashion, beauty, and toys — sourced from authorized resellers
+              and shipped across the US.
             </p>
 
             {/* Social links */}
@@ -140,7 +140,7 @@ export function Footer() {
           {/* Link columns */}
           {Object.entries(footerLinks).map(([title, links]) => (
             <nav key={title} aria-label={`${title} links`}>
-              <h3 className="text-xs font-600 uppercase tracking-widest text-[var(--text-muted)]">
+              <h3 className="text-sm font-600 text-[var(--text-secondary)]">
                 {title}
               </h3>
               <ul className="mt-3 space-y-2.5" role="list">
@@ -165,7 +165,7 @@ export function Footer() {
         <div className="mx-auto flex max-w-[1440px] flex-col items-center justify-between gap-3 px-4 py-4 text-xs text-[var(--text-muted)] sm:flex-row sm:px-6 lg:px-8">
           <p>© {new Date().getFullYear()} {siteConfig.name}. All rights reserved.</p>
           <p className="flex items-center gap-2">
-            <span>🇺🇸 United States</span>
+            <span><span aria-hidden="true">🇺🇸</span> United States</span>
             <span aria-hidden="true">·</span>
             <span>USD ($)</span>
           </p>

@@ -83,21 +83,21 @@ export function CheckoutShell({ userId, initialCouponCode = '' }: CheckoutShellP
   return (
     <div className="mx-auto max-w-[1200px] px-4 py-8 sm:px-6 lg:px-8">
       {/* Step indicator */}
-      <nav aria-label="Checkout progress" className="mb-8">
-        <ol className="flex items-center" role="list">
+      <nav aria-label="Checkout progress" className="mb-10">
+        <ol className="flex items-start" role="list">
           {STEPS.map((s, i) => {
             const done = stepIndex > i
             const active = stepIndex === i
             return (
               <li key={s.id} className="flex flex-1 items-center">
-                <div className="flex flex-col items-center gap-1.5">
+                <div className="flex flex-col items-center gap-2">
                   <div
                     className={cn(
-                      'flex h-8 w-8 items-center justify-center rounded-full text-sm font-600 transition-all duration-300',
+                      'flex h-9 w-9 items-center justify-center rounded-full text-sm font-600 shadow-sm transition-all duration-300',
                       done
-                        ? 'bg-[var(--brand-accent)] text-white'
+                        ? 'bg-[var(--brand-accent)] text-white shadow-[0_0_0_3px_color-mix(in_srgb,var(--brand-accent)_18%,transparent)]'
                         : active
-                          ? 'bg-[var(--brand-primary)] text-white ring-4 ring-[var(--brand-primary)]/20'
+                          ? 'bg-[var(--brand-primary)] text-white shadow-[0_0_0_4px_color-mix(in_srgb,var(--brand-primary)_18%,transparent)]'
                           : 'border-2 border-[var(--border-default)] bg-[var(--bg-base)] text-[var(--text-muted)]'
                     )}
                     aria-current={active ? 'step' : undefined}
@@ -107,7 +107,11 @@ export function CheckoutShell({ userId, initialCouponCode = '' }: CheckoutShellP
                   <span
                     className={cn(
                       'hidden text-xs font-500 transition-colors duration-200 sm:block',
-                      active ? 'text-[var(--text-primary)]' : 'text-[var(--text-muted)]'
+                      active
+                        ? 'font-600 text-[var(--text-primary)]'
+                        : done
+                          ? 'text-[var(--brand-accent)]'
+                          : 'text-[var(--text-muted)]'
                     )}
                   >
                     {s.label}
@@ -115,12 +119,14 @@ export function CheckoutShell({ userId, initialCouponCode = '' }: CheckoutShellP
                 </div>
                 {i < STEPS.length - 1 && (
                   <div
-                    className={cn(
-                      'mx-3 mb-4 h-px flex-1 transition-colors duration-300',
-                      stepIndex > i ? 'bg-[var(--brand-accent)]' : 'bg-[var(--border-default)]'
-                    )}
+                    className="relative mx-3 mb-5 h-px flex-1 bg-[var(--border-default)] overflow-hidden"
                     aria-hidden="true"
-                  />
+                  >
+                    <div
+                      className="absolute inset-y-0 left-0 bg-[var(--brand-accent)] transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                      style={{ width: stepIndex > i ? '100%' : '0%' }}
+                    />
+                  </div>
                 )}
               </li>
             )

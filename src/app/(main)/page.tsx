@@ -1,5 +1,6 @@
 import { unstable_cache } from 'next/cache'
 import { db } from '@/server/db'
+import { Truck, RotateCcw, Lock, Star } from 'lucide-react'
 import { HeroSection } from './_components/hero-section'
 import { BannerStrip } from './_components/banner-strip'
 import { CategoryGrid } from './_components/category-grid'
@@ -54,20 +55,21 @@ export default async function HomePage() {
       {/* Authorized reseller section — immediately below hero */}
       <AuthorizedSection authorizations={authorizations} />
 
-      {/* Trust strip */}
+      {/* Trust strip — 2-col grid on mobile, single flex row with dividers on lg+ */}
       <div className="border-b border-[var(--border-subtle)] bg-[var(--bg-subtle)]">
         <ul
           role="list"
-          className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-center gap-x-10 gap-y-3 px-4 py-4 sm:px-6 lg:px-8"
+          className="mx-auto grid max-w-[1440px] grid-cols-2 px-4 sm:px-6 lg:flex lg:items-center lg:justify-center lg:divide-x lg:divide-[var(--border-subtle)] lg:px-8"
         >
           {[
-            '🚚  Free shipping on orders $49+',
-            '↩  30-day free returns',
-            '🔒  Secure checkout',
-            '⭐  4.9 average rating',
-          ].map((item) => (
-            <li key={item} className="text-xs font-500 text-[var(--text-muted)]">
-              {item}
+            { icon: Truck,     text: 'Free shipping on orders $49+' },
+            { icon: RotateCcw, text: '30-day free returns' },
+            { icon: Lock,      text: 'Secure checkout' },
+            { icon: Star,      text: '4.9 average rating' },
+          ].map(({ icon: Icon, text }) => (
+            <li key={text} className="flex items-center justify-center gap-2 px-6 py-3.5 text-xs font-500 text-[var(--text-secondary)]">
+              <Icon className="h-3.5 w-3.5 shrink-0 text-[var(--brand-accent)]" aria-hidden="true" />
+              {text}
             </li>
           ))}
         </ul>

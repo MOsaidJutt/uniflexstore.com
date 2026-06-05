@@ -20,14 +20,14 @@ export function BrandAuthCard({ auth }: Props) {
       <m.article
         whileHover={{
           y: -4,
-          boxShadow: '0 16px 40px -8px rgba(29, 170, 188, 0.18), 0 4px 12px -4px rgba(10, 21, 32, 0.12)',
+          boxShadow: '0 16px 40px -8px color-mix(in srgb, var(--brand-accent) 18%, transparent), 0 4px 12px -4px rgba(10, 21, 32, 0.12)',
         }}
         transition={{ type: 'spring', stiffness: 360, damping: 28 }}
         className="group relative flex flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] p-6"
       >
         {/* Auth type badge */}
         <div className="mb-5 flex items-center justify-between">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--brand-accent)]/10 px-3 py-1 text-[11px] font-700 uppercase tracking-wider text-[var(--brand-accent)]">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[var(--brand-accent)]/10 px-3 py-1 text-[11px] font-700 text-[var(--brand-accent)]">
             <ShieldCheck className="h-3 w-3" aria-hidden="true" />
             {auth.authorizationType}
           </span>

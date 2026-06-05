@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { Eye } from 'lucide-react'
+import { Eye, Package } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ProductCard as ProductCardType } from '@/types/catalog'
 import { StarRating } from './star-rating'
@@ -49,7 +49,7 @@ export function ProductCard({ product, priority, onQuickView, className }: Produ
             />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg-muted)]">
-              <span className="text-xs text-[var(--text-muted)]">No image</span>
+              <Package className="h-8 w-8 text-[var(--text-muted)]" aria-hidden="true" />
             </div>
           )}
 
@@ -110,9 +110,9 @@ export function ProductCard({ product, priority, onQuickView, className }: Produ
         <div className="absolute inset-x-0 bottom-0 translate-y-full opacity-0 transition-all duration-[250ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-y-0 group-hover:opacity-100">
           <Link
             href={`/products/${slug}`}
-            className="flex w-full items-center justify-center bg-[var(--brand-primary)] py-2.5 text-xs font-600 uppercase tracking-[0.12em] text-white transition-colors duration-150 hover:bg-[var(--brand-secondary)]"
+            className="flex w-full items-center justify-center gap-1.5 bg-[var(--brand-primary)] py-2.5 text-xs font-600 text-white transition-colors duration-150 hover:bg-[var(--brand-secondary)]"
           >
-            View Product
+            View product
           </Link>
         </div>
       </div>

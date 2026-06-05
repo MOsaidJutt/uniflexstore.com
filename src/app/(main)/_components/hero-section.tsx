@@ -3,8 +3,8 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { m, AnimatePresence } from 'motion/react'
-import { ArrowRight, Zap } from 'lucide-react'
+import { m, AnimatePresence, useReducedMotion } from 'motion/react'
+import { ArrowRight, Zap, Users, Truck } from 'lucide-react'
 import { heroContainer, heroLine } from '@/lib/motion'
 
 export interface HeroImage {
@@ -42,7 +42,10 @@ function ProductOrbit({ pool }: { pool: HeroImage[] }) {
     return [src[0], src[1], src[2]]
   })
 
+  const reducedMotion = useReducedMotion()
+
   useEffect(() => {
+    if (reducedMotion) return
     const src = pool.length >= 3 ? pool : FALLBACK
     let nextIdx = 3
 
@@ -58,7 +61,7 @@ function ProductOrbit({ pool }: { pool: HeroImage[] }) {
     }, CYCLE_INTERVAL)
 
     return () => clearInterval(id)
-  }, [pool])
+  }, [pool, reducedMotion])
 
   return (
     // 400×400 container; orbit radius 130px; cards 140×140 → margin -70px centres them
@@ -120,6 +123,7 @@ function ProductOrbit({ pool }: { pool: HeroImage[] }) {
 
 export function HeroSection({ orbitImages = [] }: Props) {
   const pool = orbitImages.length >= 3 ? orbitImages : FALLBACK
+  const reducedMotion = useReducedMotion()
 
   return (
     <section
@@ -127,14 +131,22 @@ export function HeroSection({ orbitImages = [] }: Props) {
       className="relative flex min-h-[88vh] items-center overflow-hidden border-b border-[var(--border-subtle)] bg-[var(--bg-base)]"
     >
       {/* Atmospheric blobs */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <div
-          className="absolute -right-1/4 -top-1/4 h-[600px] w-[600px] rounded-full opacity-[0.12] dark:opacity-[0.08]"
-          style={{ background: 'radial-gradient(circle, var(--brand-accent) 0%, transparent 70%)' }}
+          className="absolute -right-1/4 -top-1/4 h-[700px] w-[700px] rounded-full opacity-[0.14] dark:opacity-[0.09]"
+          style={{ background: 'radial-gradient(circle at 40% 40%, var(--brand-accent) 0%, transparent 65%)' }}
         />
         <div
-          className="absolute -bottom-1/3 -left-1/4 h-[500px] w-[500px] rounded-full opacity-[0.07] dark:opacity-[0.05]"
-          style={{ background: 'radial-gradient(circle, var(--brand-accent) 0%, transparent 70%)' }}
+          className="absolute -bottom-1/3 -left-1/4 h-[600px] w-[600px] rounded-full opacity-[0.08] dark:opacity-[0.06]"
+          style={{ background: 'radial-gradient(circle at 60% 60%, var(--brand-accent) 0%, transparent 65%)' }}
+        />
+        {/* Fine grid texture — adds depth at low opacity */}
+        <div
+          className="absolute inset-0 opacity-[0.025] dark:opacity-[0.04]"
+          style={{
+            backgroundImage: 'linear-gradient(var(--border-default) 1px, transparent 1px), linear-gradient(90deg, var(--border-default) 1px, transparent 1px)',
+            backgroundSize: '64px 64px',
+          }}
         />
       </div>
 
@@ -196,18 +208,30 @@ export function HeroSection({ orbitImages = [] }: Props) {
 
             <m.div
               variants={heroLine}
-              className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-[var(--border-subtle)] pt-6"
+              className="mt-10 border-t border-[var(--border-subtle)] pt-6"
             >
-              {[
-                { value: '50K+', label: 'Happy customers' },
-                { value: '4.9★', label: 'Average rating' },
-                { value: 'Free', label: 'Shipping on $49+' },
-              ].map(({ value, label }) => (
-                <div key={label} className="flex items-baseline gap-1.5">
-                  <span className="font-serif text-lg font-600 text-[var(--text-primary)]">{value}</span>
-                  <span className="text-xs text-[var(--text-muted)]">{label}</span>
-                </div>
-              ))}
+              <dl className="flex flex-wrap items-center gap-x-0 gap-y-3">
+                {[
+                  { icon: Users,  value: '50K+',  label: 'customers' },
+                  { icon: null,   value: '4.9★',  label: 'avg rating' },
+                  { icon: Truck,  value: 'Free',  label: 'shipping $49+' },
+                ].map(({ icon: Icon, value, label }, i) => (
+                  <div key={label} className="flex items-center">
+                    {i > 0 && (
+                      <div aria-hidden="true" className="mx-5 h-7 w-px bg-[var(--border-subtle)]" />
+                    )}
+                    <div className="flex items-center gap-2">
+                      {Icon && (
+                        <Icon className="h-3.5 w-3.5 text-[var(--brand-accent)]" aria-hidden="true" />
+                      )}
+                      <div className="flex items-baseline gap-1.5">
+                        <dt className="font-serif text-lg font-600 text-[var(--text-primary)]">{value}</dt>
+                        <dd className="text-xs text-[var(--text-muted)]">{label}</dd>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </dl>
             </m.div>
           </m.div>
 
@@ -223,25 +247,25 @@ export function HeroSection({ orbitImages = [] }: Props) {
         </div>
       </div>
 
-      {/* Scroll cue */}
-      <m.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.4, duration: 0.5 }}
-        aria-hidden="true"
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
-      >
+      {/* Scroll cue — hidden for reduced-motion: repeat:Infinity would strobe */}
+      {!reducedMotion && (
         <m.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
-          className="flex flex-col items-center gap-1.5"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.4, duration: 0.5 }}
+          aria-hidden="true"
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
         >
-          <span className="text-[10px] font-500 uppercase tracking-[0.2em] text-[var(--text-muted)]">
-            Scroll
-          </span>
-          <div className="h-6 w-px bg-gradient-to-b from-[var(--text-muted)] to-transparent" />
+          <m.div
+            animate={{ y: [0, 7, 0] }}
+            transition={{ repeat: Infinity, duration: 2.2, ease: [0.45, 0, 0.55, 1] }}
+            className="flex flex-col items-center gap-1"
+          >
+            <div className="h-8 w-px bg-gradient-to-b from-transparent via-[var(--brand-accent)]/40 to-[var(--brand-accent)]" />
+            <div className="h-1.5 w-1.5 rounded-full bg-[var(--brand-accent)]" />
+          </m.div>
         </m.div>
-      </m.div>
+      )}
     </section>
   )
 }

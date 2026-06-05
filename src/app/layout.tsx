@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Inter, Playfair_Display } from 'next/font/google'
 import { ThemeProvider } from '@/components/shared/theme-provider'
 import { MotionProvider } from '@/components/shared/motion-provider'
+import { PlaceholderFill } from '@/components/shared/placeholder-fill'
 import { siteConfig } from '@/config/site'
 import './globals.css'
 
@@ -77,6 +78,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           <MotionProvider>
             {children}
+            <PlaceholderFill />
           </MotionProvider>
         </ThemeProvider>
       </body>

@@ -39,10 +39,15 @@ export function MotionProvider({ children }: MotionProviderProps) {
     }
   }, [])
 
-  // Lenis owns the scroll position, so Next.js's built-in scroll-to-top on
-  // navigation never fires. Reset to 0 immediately on every route change.
+  // Reset scroll to top on every route change. history.scrollRestoration='manual'
+  // prevents the browser from restoring position, but we must also reset Lenis's
+  // internal state. Call native scrollTo first so the viewport snaps immediately,
+  // then sync Lenis so its animatedScroll stays consistent.
   useEffect(() => {
-    lenisRef.current?.scrollTo(0, { immediate: true })
+    window.scrollTo(0, 0)
+    if (lenisRef.current) {
+      lenisRef.current.scrollTo(0, { immediate: true })
+    }
   }, [pathname])
 
   return (

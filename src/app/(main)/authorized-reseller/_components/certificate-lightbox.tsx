@@ -38,13 +38,16 @@ export function CertificateLightbox({
   const panelRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
 
-  // Move focus into the dialog when it opens; return it when it closes
+  // Move focus into the dialog when it opens; return it to the trigger when it
+  // closes. Returning focus lives in the cleanup (not an `else` branch) so it
+  // only fires on the open→closed transition — never on mount, which would
+  // otherwise steal focus onto the trigger button (and scroll it into view).
   useEffect(() => {
-    if (open) {
-      // Defer one frame so the panel has rendered
-      const id = requestAnimationFrame(() => closeButtonRef.current?.focus())
-      return () => cancelAnimationFrame(id)
-    } else {
+    if (!open) return
+    // Defer one frame so the panel has rendered
+    const id = requestAnimationFrame(() => closeButtonRef.current?.focus())
+    return () => {
+      cancelAnimationFrame(id)
       triggerRef?.current?.focus()
     }
   }, [open, triggerRef])

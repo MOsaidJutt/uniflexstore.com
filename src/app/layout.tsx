@@ -77,6 +77,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       suppressHydrationWarning
     >
       <body className="flex min-h-dvh flex-col antialiased">
+        {/* Claim manual scroll restoration before React hydrates so the browser
+            never restores a saved position on top of Lenis. */}
+        <script dangerouslySetInnerHTML={{ __html: "history.scrollRestoration='manual'" }} />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

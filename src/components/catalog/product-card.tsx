@@ -38,7 +38,7 @@ export function ProductCard({ product, priority, onQuickView, className }: Produ
         style={{ viewTransitionName: `product-image-${slug}` }}
       >
         <div className="relative aspect-square">
-          {images[0] ? (
+          {images[0]?.url ? (
             <Image
               src={images[0].url}
               alt={images[0].alt ?? name}
@@ -54,7 +54,7 @@ export function ProductCard({ product, priority, onQuickView, className }: Produ
           )}
 
           {/* Second image crossfade on hover */}
-          {images[1] && (
+          {images[1]?.url && (
             <Image
               src={images[1].url}
               alt={images[1].alt ?? `${name} alternate`}

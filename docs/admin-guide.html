@@ -1,0 +1,1123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>UniFlex Global — Store Operations &amp; Admin Guide</title>
+<style>
+  :root {
+    --brand-primary: #1a3a4a;
+    --brand-accent: #1daabc;
+    --brand-accent-hover: #1590a2;
+    --brand-teal-light: #e0f5f8;
+    --bg-base: #ffffff;
+    --bg-subtle: #f6f9fa;
+    --text-primary: #0d1f2d;
+    --text-secondary: #44606e;
+    --text-muted: #7d99a3;
+    --border-default: #d6e3e8;
+    --success: #059669;
+    --warning: #d97706;
+    --error: #dc2626;
+    --info: #2563eb;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-primary);
+    background: var(--bg-subtle);
+    line-height: 1.6;
+    font-size: 15px;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--brand-primary);
+    line-height: 1.25;
+  }
+
+  /* ─── Layout ──────────────────────────────────────────────────────── */
+  .shell { display: flex; max-width: 1280px; margin: 0 auto; }
+
+  .toc {
+    width: 270px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    height: 100vh;
+    overflow-y: auto;
+    background: var(--brand-primary);
+    color: #cfe6ec;
+    padding: 28px 20px;
+  }
+  .toc .toc-brand {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 22px;
+  }
+  .toc .toc-brand .logo-dot {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: var(--brand-accent);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: #fff; font-family: Georgia, serif;
+    flex-shrink: 0;
+  }
+  .toc .toc-brand strong { color: #fff; font-size: 14px; letter-spacing: .02em; }
+  .toc .toc-brand span { display: block; font-size: 11px; color: #9fc3cd; }
+  .toc nav a {
+    display: block;
+    color: #b9d8e0;
+    text-decoration: none;
+    font-size: 13.5px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    margin-bottom: 2px;
+    transition: background .12s, color .12s;
+  }
+  .toc nav a:hover { background: rgba(255,255,255,.08); color: #fff; }
+  .toc nav .toc-num {
+    display: inline-block; width: 20px; color: var(--brand-accent); font-weight: 600;
+  }
+  .toc .toc-divider { height: 1px; background: rgba(255,255,255,.12); margin: 14px 0; }
+
+  .content { flex: 1; min-width: 0; padding: 0 0 80px; }
+
+  /* ─── Cover ───────────────────────────────────────────────────────── */
+  .cover {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 60px 64px;
+    background:
+      radial-gradient(circle at 85% 15%, var(--brand-teal-light) 0%, transparent 45%),
+      var(--bg-base);
+    border-bottom: 1px solid var(--border-default);
+  }
+  .cover .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--brand-accent);
+    background: var(--brand-teal-light);
+    padding: 6px 14px; border-radius: 999px;
+    width: fit-content; margin-bottom: 22px;
+  }
+  .cover h1 {
+    font-size: 52px; margin: 0 0 8px; max-width: 720px;
+  }
+  .cover .subtitle {
+    font-size: 19px; color: var(--text-secondary); max-width: 620px; margin: 0 0 28px;
+  }
+  .cover .meta-row {
+    display: flex; flex-wrap: wrap; gap: 28px; margin-top: 20px;
+    font-size: 13px; color: var(--text-muted);
+  }
+  .cover .meta-row strong { color: var(--text-primary); display: block; font-size: 14px; }
+  .cover .confidential {
+    margin-top: 40px; padding: 14px 18px; border-radius: 10px;
+    background: #fff7ed; border: 1px solid #fdba74; color: #9a3412;
+    font-size: 13.5px; max-width: 640px;
+  }
+
+  /* ─── Sections ────────────────────────────────────────────────────── */
+  section.guide-section {
+    padding: 56px 64px;
+    border-bottom: 1px solid var(--border-default);
+  }
+  section.guide-section:nth-child(even) { background: var(--bg-base); }
+  section.guide-section:nth-child(odd) { background: var(--bg-subtle); }
+
+  .section-kicker {
+    font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--brand-accent); margin-bottom: 8px;
+  }
+  h2.section-title {
+    font-size: 30px; margin: 0 0 6px;
+    display: flex; align-items: baseline; gap: 14px;
+  }
+  h2.section-title .num {
+    font-family: Georgia, serif; font-size: 22px; color: var(--brand-accent);
+    border: 2px solid var(--brand-accent); border-radius: 50%;
+    width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-intro { color: var(--text-secondary); max-width: 760px; margin: 14px 0 28px; }
+
+  h3 { font-size: 19px; margin: 32px 0 10px; }
+  h3 .path {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 13px; font-weight: 400; color: var(--brand-accent);
+    background: var(--brand-teal-light); padding: 2px 8px; border-radius: 6px;
+    margin-left: 8px;
+  }
+  h4 { font-size: 15px; margin: 20px 0 8px; color: var(--text-primary); font-family: inherit; font-weight: 700; }
+
+  p { color: var(--text-secondary); }
+  ul, ol { color: var(--text-secondary); padding-left: 22px; }
+  li { margin-bottom: 5px; }
+  li strong { color: var(--text-primary); }
+  code {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    background: var(--brand-teal-light); color: var(--brand-accent-hover);
+    padding: 1px 6px; border-radius: 5px; font-size: .9em;
+  }
+
+  /* ─── Callouts ────────────────────────────────────────────────────── */
+  .callout {
+    border-radius: 10px; padding: 14px 18px; margin: 18px 0;
+    border: 1px solid; font-size: 14px;
+  }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout .callout-title { font-weight: 700; margin-bottom: 4px; display: block; }
+  .callout.tip { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+  .callout.tip .callout-title { color: var(--success); }
+  .callout.note { background: var(--brand-teal-light); border-color: #a8dde6; color: #0e4f5c; }
+  .callout.note .callout-title { color: var(--brand-accent-hover); }
+  .callout.warning { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+  .callout.warning .callout-title { color: var(--warning); }
+  .callout.danger { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
+  .callout.danger .callout-title { color: var(--error); }
+  .callout p, .callout li { color: inherit; }
+
+  /* ─── Credential cards ────────────────────────────────────────────── */
+  .cred-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 18px 0; }
+  .cred-card {
+    border: 1px solid var(--border-default); border-radius: 12px; padding: 16px 18px;
+    background: var(--bg-base);
+  }
+  .cred-card .role {
+    display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+    padding: 3px 10px; border-radius: 999px; margin-bottom: 10px;
+  }
+  .cred-card.admin .role { background: var(--brand-primary); color: #fff; }
+  .cred-card.customer .role { background: var(--brand-teal-light); color: var(--brand-accent-hover); }
+  .cred-field { margin-bottom: 8px; }
+  .cred-field label { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: 2px; }
+  .cred-field .val {
+    font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+    font-size: 14px; font-weight: 600; color: var(--text-primary);
+    background: var(--bg-subtle); border: 1px solid var(--border-default);
+    border-radius: 6px; padding: 6px 10px; display: block; word-break: break-all;
+  }
+
+  /* ─── Tables ──────────────────────────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13.5px; }
+  caption { caption-side: top; text-align: left; font-weight: 700; margin-bottom: 6px; color: var(--text-primary); }
+  th, td { border: 1px solid var(--border-default); padding: 9px 12px; text-align: left; vertical-align: top; }
+  th { background: var(--brand-primary); color: #fff; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  tr:nth-child(even) td { background: var(--bg-subtle); }
+
+  /* ─── Badges ──────────────────────────────────────────────────────── */
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 9px;
+    border-radius: 999px; letter-spacing: .03em;
+  }
+  .badge.warning { background: #fef3c7; color: #92400e; }
+  .badge.info { background: #dbeafe; color: #1e40af; }
+  .badge.default { background: var(--brand-teal-light); color: var(--brand-accent-hover); }
+  .badge.success { background: #d1fae5; color: #065f46; }
+  .badge.destructive { background: #fee2e2; color: #991b1b; }
+  .badge.secondary { background: #e5e7eb; color: #374151; }
+
+  /* ─── Step lists ──────────────────────────────────────────────────── */
+  .steps { counter-reset: step; list-style: none; padding-left: 0; margin: 16px 0; }
+  .steps li {
+    counter-increment: step; position: relative; padding-left: 42px; margin-bottom: 14px;
+    color: var(--text-secondary);
+  }
+  .steps li::before {
+    content: counter(step); position: absolute; left: 0; top: 0;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--brand-accent); color: #fff; font-weight: 700; font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .steps li strong { color: var(--text-primary); }
+
+  /* ─── Field reference cards ──────────────────────────────────────── */
+  .field-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin: 14px 0; }
+  .field-card {
+    border: 1px solid var(--border-default); border-radius: 10px; padding: 10px 14px; background: var(--bg-base);
+  }
+  .field-card .fname { font-weight: 700; font-size: 13.5px; color: var(--text-primary); }
+  .field-card .fdesc { font-size: 12.5px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ─── Sitemap tree ─────────────────────────────────────────────────── */
+  .sitemap { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 13px; background: var(--bg-base); border: 1px solid var(--border-default); border-radius: 10px; padding: 16px 20px; color: var(--text-secondary); }
+  .sitemap .indent1 { padding-left: 22px; }
+  .sitemap .indent2 { padding-left: 44px; }
+  .sitemap .route { color: var(--brand-accent-hover); font-weight: 600; }
+  .sitemap .desc { color: var(--text-muted); }
+
+  /* ─── Footer ──────────────────────────────────────────────────────── */
+  .doc-footer { padding: 40px 64px; text-align: center; color: var(--text-muted); font-size: 12.5px; }
+
+  /* ─── Print ───────────────────────────────────────────────────────── */
+  @media print {
+    .toc { display: none; }
+    .shell { display: block; max-width: 100%; }
+    .content { padding: 0; }
+    .cover { min-height: auto; page-break-after: always; }
+    section.guide-section { page-break-before: always; padding: 24px 6px; background: #fff !important; }
+    .callout, .cred-card, .field-card, table { page-break-inside: avoid; }
+    a { color: inherit; text-decoration: none; }
+  }
+
+  @media (max-width: 900px) {
+    .toc { display: none; }
+    .cover, section.guide-section { padding: 32px 24px; }
+    .cover h1 { font-size: 36px; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ════════════════════════ TABLE OF CONTENTS ════════════════════════ -->
+  <aside class="toc">
+    <div class="toc-brand">
+      <div class="logo-dot">U</div>
+      <div>
+        <strong>UniFlex Global</strong>
+        <span>Store Operations Guide</span>
+      </div>
+    </div>
+    <nav>
+      <a href="#start"><span class="toc-num">1</span>Getting Started</a>
+      <a href="#login"><span class="toc-num">2</span>Login &amp; Account Security</a>
+      <a href="#dashboard"><span class="toc-num">3</span>Dashboard</a>
+      <a href="#products"><span class="toc-num">4</span>Products</a>
+      <a href="#orders"><span class="toc-num">5</span>Orders</a>
+      <a href="#customers"><span class="toc-num">6</span>Customers</a>
+      <a href="#categories"><span class="toc-num">7</span>Categories</a>
+      <a href="#coupons"><span class="toc-num">8</span>Coupons &amp; Discounts</a>
+      <a href="#banners"><span class="toc-num">9</span>Homepage Banners</a>
+      <a href="#brand-auth"><span class="toc-num">10</span>Brand Authorizations</a>
+      <a href="#analytics"><span class="toc-num">11</span>Analytics</a>
+      <a href="#settings"><span class="toc-num">12</span>Store Settings</a>
+      <a href="#ai-assistant"><span class="toc-num">13</span>AI Shopping Assistant</a>
+      <a href="#storefront"><span class="toc-num">14</span>The Storefront</a>
+      <a href="#services"><span class="toc-num">15</span>Services &amp; Credentials</a>
+      <a href="#reference"><span class="toc-num">16</span>Quick Reference</a>
+      <div class="toc-divider"></div>
+      <a href="#" onclick="window.print(); return false;">🖨️ Print / Save as PDF</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+
+    <!-- ════════════════════════ COVER ════════════════════════ -->
+    <section class="cover">
+      <span class="eyebrow">Store Operations Guide</span>
+      <h1>UniFlex Global — Admin &amp; Owner Guide</h1>
+      <p class="subtitle">
+        Everything you need to log in, manage products and orders, run promotions,
+        and understand what your customers see — written for the store owner / admin team.
+      </p>
+      <div class="meta-row">
+        <div><strong>Site</strong>uniflexstore.com</div>
+        <div><strong>Admin Panel</strong>/admin</div>
+        <div><strong>Prepared</strong>June 10, 2026</div>
+        <div><strong>Audience</strong>Store Owner &amp; Admin Staff</div>
+      </div>
+      <div class="confidential">
+        <strong>🔒 Confidential — internal use only.</strong> This document contains login
+        credentials. Store it somewhere private (password manager or locked drive), and do
+        not forward it by email or post it publicly. See Section 2 for steps to change the
+        default password before launch.
+      </div>
+    </section>
+
+    <!-- ════════════════════════ 1. GETTING STARTED ════════════════════════ -->
+    <section class="guide-section" id="start">
+      <div class="section-kicker">Section 1</div>
+      <h2 class="section-title"><span class="num">1</span>Getting Started</h2>
+      <p class="section-intro">
+        UniFlex Global has two halves: the <strong>storefront</strong> (the public website your
+        customers shop on) and the <strong>admin panel</strong> (the back-office where you manage
+        products, orders, and store settings). Both live on the same domain.
+      </p>
+
+      <h3>The two sides of your site</h3>
+      <div class="sitemap">
+        <div><span class="route">https://uniflexstore.com/</span> <span class="desc">— public storefront (customers)</span></div>
+        <div><span class="route">https://uniflexstore.com/admin</span> <span class="desc">— admin panel (you / staff only)</span></div>
+        <div><span class="route">https://uniflexstore.com/auth/login</span> <span class="desc">— sign-in page for both customers and admins</span></div>
+      </div>
+      <p>
+        There's only one login page. After signing in, regular customers land on their account
+        page, while staff with an <strong>Admin</strong> or <strong>Super Admin</strong> role are
+        able to open <code>/admin</code> from the storefront footer or by navigating there directly.
+      </p>
+
+      <div class="callout note">
+        <span class="callout-title">📌 How to use this guide</span>
+        <p>
+          Each section below mirrors the menu on the left side of the admin panel
+          (Dashboard, Products, Orders, Customers, Categories, Coupons, Banners, Brand Auths,
+          Analytics, Settings). Section 14 covers the customer-facing storefront, and Section 15
+          explains the outside services (payments, email, images, AI) that power the store.
+        </p>
+      </div>
+
+      <h3>First-time setup checklist</h3>
+      <ol class="steps">
+        <li><strong>Log in</strong> with the admin account in Section 2 and confirm the dashboard loads.</li>
+        <li><strong>Change the default admin password</strong> immediately — see Section 2.3.</li>
+        <li><strong>Review Store Settings</strong> (Section 12): store name, support email, tax rate, and shipping rates should reflect your real business.</li>
+        <li><strong>Check your products</strong> (Section 4): the demo catalog has 20 sample products across Electronics, Fashion, Beauty, and Toys — replace or remove these before going live.</li>
+        <li><strong>Set up your homepage banners</strong> (Section 9) and any launch coupons (Section 8).</li>
+        <li><strong>Confirm payments work</strong> by asking your developer to switch Stripe from test keys to live keys (Section 15).</li>
+        <li><strong>Decide on the AI shopping assistant</strong> (Section 13) — turn it on by adding an OpenAI key in Settings, or leave it off.</li>
+        <li><strong>Remove the demo customer accounts</strong> (Alice, Bob, Carol — Section 2.4) once you no longer need them for testing.</li>
+      </ol>
+    </section>
+
+    <!-- ════════════════════════ 2. LOGIN & SECURITY ════════════════════════ -->
+    <section class="guide-section" id="login">
+      <div class="section-kicker">Section 2</div>
+      <h2 class="section-title"><span class="num">2</span>Login &amp; Account Security</h2>
+      <p class="section-intro">
+        Sign in at <code>/auth/login</code>. The same form is used by customers and staff —
+        what you see after logging in depends on your account's role.
+      </p>
+
+      <h3>2.1 — Your admin login</h3>
+      <div class="cred-grid">
+        <div class="cred-card admin">
+          <span class="role">Store Admin</span>
+          <div class="cred-field">
+            <label>Email</label>
+            <span class="val">admin@uniflexstore.com</span>
+          </div>
+          <div class="cred-field">
+            <label>Password</label>
+            <span class="val">Admin@1234</span>
+          </div>
+          <div class="cred-field">
+            <label>Role</label>
+            <span class="val">ADMIN — full access to /admin</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="callout danger">
+        <span class="callout-title">⚠️ Change this password before launch</span>
+        <p>
+          <code>Admin@1234</code> is the default password created when the store database was
+          first set up (seeded). Anyone with this document can sign in until it's changed.
+          See Section 2.3 for how to change it.
+        </p>
+      </div>
+
+      <h3>2.2 — How to sign in</h3>
+      <ol class="steps">
+        <li>Go to <code>https://uniflexstore.com/auth/login</code>.</li>
+        <li>Enter the email and password above (or your own staff account once created).</li>
+        <li>
+          Optionally tick <strong>"Keep me signed in for 30 days"</strong> — otherwise your
+          session expires after 1 day.
+        </li>
+        <li>Click <strong>Sign in</strong>. You'll be taken to your account page — from there,
+          open <code>/admin</code> to reach the back office.</li>
+      </ol>
+      <p>
+        The login page also offers <strong>Google, GitHub, and Facebook</strong> sign-in
+        buttons. These only work once your developer adds the matching API keys to the
+        site's configuration (Section 15) — until then, use email/password.
+      </p>
+
+      <h3>2.3 — Changing your password</h3>
+      <ol class="steps">
+        <li>From the login page, click <strong>"Forgot password?"</strong>.</li>
+        <li>Enter <code>admin@uniflexstore.com</code> and submit. The store emails a secure
+          reset link to that address (valid for 1 hour).</li>
+        <li>Open the email, click the reset link, and choose a new password.</li>
+      </ol>
+      <div class="callout warning">
+        <span class="callout-title">📧 This requires email sending to be configured</span>
+        <p>
+          The reset link is delivered via the store's email service (Resend — see Section 15).
+          If password-reset emails aren't arriving, ask your developer to confirm the
+          <code>RESEND_API_KEY</code> is set up. As a fallback, your developer can update the
+          password directly in the database.
+        </p>
+      </div>
+
+      <h3>2.4 — Demo / test accounts</h3>
+      <p>
+        These customer accounts were created for testing the storefront (placing test orders,
+        leaving reviews, etc.). They are <strong>not real customers</strong> — feel free to
+        leave them for your own testing, or ask your developer to remove them before launch.
+      </p>
+      <div class="cred-grid">
+        <div class="cred-card customer">
+          <span class="role">Test Customer</span>
+          <div class="cred-field"><label>Email</label><span class="val">alice@example.com</span></div>
+          <div class="cred-field"><label>Password</label><span class="val">Test@1234</span></div>
+        </div>
+        <div class="cred-card customer">
+          <span class="role">Test Customer</span>
+          <div class="cred-field"><label>Email</label><span class="val">bob@example.com</span></div>
+          <div class="cred-field"><label>Password</label><span class="val">Test@1234</span></div>
+        </div>
+        <div class="cred-card customer">
+          <span class="role">Test Customer</span>
+          <div class="cred-field"><label>Email</label><span class="val">carol@example.com</span></div>
+          <div class="cred-field"><label>Password</label><span class="val">Test@1234</span></div>
+        </div>
+      </div>
+
+      <h3>2.5 — Account roles</h3>
+      <table>
+        <tr><th>Role</th><th>Can do</th></tr>
+        <tr><td><span class="badge secondary">CUSTOMER</span></td><td>Default role for everyone who registers. Can shop, check out, view their own orders, write reviews. Cannot open <code>/admin</code>.</td></tr>
+        <tr><td><span class="badge default">ADMIN</span></td><td>Everything a customer can do, <strong>plus</strong> full access to the admin panel described in this guide.</td></tr>
+        <tr><td><span class="badge info">SUPER_ADMIN</span></td><td>Same access as Admin. Reserved for the highest level of trust (e.g. agency/owner account).</td></tr>
+      </table>
+      <div class="callout tip">
+        <span class="callout-title">💡 Adding more staff logins</span>
+        <p>
+          To give a team member admin access: have them register a normal account on the
+          storefront, then ask your developer to change their role to <code>ADMIN</code> in the
+          database (there is currently no in-app "invite staff" screen).
+        </p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════ 3. DASHBOARD ════════════════════════ -->
+    <section class="guide-section" id="dashboard">
+      <div class="section-kicker">Section 3</div>
+      <h2 class="section-title"><span class="num">3</span>Dashboard <span class="path">/admin</span></h2>
+      <p class="section-intro">
+        The Dashboard is the home page of the admin panel — a snapshot of how the store is
+        doing right now. It's the first thing you see after opening <code>/admin</code>.
+      </p>
+
+      <h3>What's on the dashboard</h3>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Total Revenue</div><div class="fdesc">Sum of completed order totals, with the % change vs. last month.</div></div>
+        <div class="field-card"><div class="fname">Orders This Month</div><div class="fdesc">Count of orders placed since the 1st of the current month.</div></div>
+        <div class="field-card"><div class="fname">Pending Orders</div><div class="fdesc">Orders awaiting processing — check these daily.</div></div>
+        <div class="field-card"><div class="fname">Total Customers</div><div class="fdesc">All registered customer accounts.</div></div>
+        <div class="field-card"><div class="fname">Revenue Chart</div><div class="fdesc">Monthly revenue trend over the last 6 months.</div></div>
+        <div class="field-card"><div class="fname">Top Products</div><div class="fdesc">Your 5 best-selling products by units sold.</div></div>
+        <div class="field-card"><div class="fname">Recent Orders</div><div class="fdesc">The 8 most recent orders — click any row to open it.</div></div>
+        <div class="field-card"><div class="fname">Low Stock</div><div class="fdesc">Products running low/out of stock — click to restock.</div></div>
+      </div>
+
+      <h3>Certificate alerts banner</h3>
+      <p>
+        If any <strong>Brand Authorization</strong> certificate (Section 10) is expired or
+        expiring within 30 days, an amber alert appears at the top of the dashboard with a
+        link straight to the Brand Authorizations page so you can renew it.
+      </p>
+    </section>
+
+    <!-- ════════════════════════ 4. PRODUCTS ════════════════════════ -->
+    <section class="guide-section" id="products">
+      <div class="section-kicker">Section 4</div>
+      <h2 class="section-title"><span class="num">4</span>Products <span class="path">/admin/products</span></h2>
+      <p class="section-intro">
+        This is where you manage your entire catalog — add new items, edit prices and stock,
+        upload photos, and organize variants like size or color.
+      </p>
+
+      <h3>The product list</h3>
+      <ul>
+        <li><strong>Search</strong> by name or SKU using the search box.</li>
+        <li>The page shows total product count and supports pagination for large catalogs.</li>
+        <li><strong>Export CSV</strong> — downloads your full catalog as a spreadsheet (great for backups or bulk edits in Excel).</li>
+        <li><strong>Import CSV</strong> — bulk-create products from a spreadsheet (see below).</li>
+        <li><strong>Add Product</strong> — opens the new product form.</li>
+      </ul>
+
+      <h3>Adding / editing a product <span class="path">/admin/products/new</span></h3>
+      <p>The product form is organized into cards:</p>
+
+      <h4>Basic Info</h4>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Name *</div><div class="fdesc">Product title shown to customers. Typing here auto-fills the URL slug for new products.</div></div>
+        <div class="field-card"><div class="fname">Slug</div><div class="fdesc">The web address piece, e.g. <code>probook-air-15</code> → <code>/products/probook-air-15</code>. Edit only if you know what you're doing — changing it breaks old links.</div></div>
+        <div class="field-card"><div class="fname">Description</div><div class="fdesc">Full product description shown on the product page.</div></div>
+      </div>
+
+      <h4>Pricing</h4>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Price *</div><div class="fdesc">The current selling price.</div></div>
+        <div class="field-card"><div class="fname">Compare At</div><div class="fdesc">An original/"was" price. When set higher than Price, the storefront shows a strikethrough sale price.</div></div>
+        <div class="field-card"><div class="fname">SKU *</div><div class="fdesc">Your internal stock-keeping code, e.g. <code>ELEC-LT-001</code>.</div></div>
+      </div>
+
+      <h4>Inventory</h4>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Stock Quantity</div><div class="fdesc">Units available. Used directly if the product has no variants.</div></div>
+      </div>
+
+      <h4>Images</h4>
+      <p>
+        Drag and drop or click to upload product photos — they're stored in Cloudinary
+        (Section 15) and optimized automatically. You can upload multiple images, reorder
+        them, and the first image becomes the main thumbnail.
+      </p>
+
+      <h4>Variants</h4>
+      <p>
+        Use variants for products that come in different sizes, colors, or storage options
+        (e.g. a t-shirt in S/M/L, or a phone in 3 colors). Click <strong>Add Variant</strong>
+        and fill in:
+      </p>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Type</div><div class="fdesc">e.g. "Color" or "Size"</div></div>
+        <div class="field-card"><div class="fname">Value</div><div class="fdesc">e.g. "Red" or "Large"</div></div>
+        <div class="field-card"><div class="fname">Price override</div><div class="fdesc">Optional — leave blank to use the base Price</div></div>
+        <div class="field-card"><div class="fname">Stock</div><div class="fdesc">Units available for this specific variant</div></div>
+        <div class="field-card"><div class="fname">SKU</div><div class="fdesc">Variant-specific stock code</div></div>
+      </div>
+      <p>If a product has no variants, customers simply buy it using the base price/stock above.</p>
+
+      <h4>Status (sidebar)</h4>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Active</div><div class="fdesc">Off = hidden from the storefront (draft). On = visible and purchasable.</div></div>
+        <div class="field-card"><div class="fname">Featured</div><div class="fdesc">Shows the product in "Featured" sections on the homepage and category pages.</div></div>
+      </div>
+
+      <h4>Categories (sidebar)</h4>
+      <p>Tick every category this product should appear under (a product can belong to more than one).</p>
+
+      <h3>Bulk import via CSV <span class="path">/admin/products/import</span></h3>
+      <p>To add many products at once:</p>
+      <ol class="steps">
+        <li>Click <strong>Download Template</strong> to get a starter CSV with the correct column headers.</li>
+        <li>Fill in your products in Excel/Google Sheets. Required columns: <code>name</code>, <code>slug</code>, <code>description</code>, <code>price</code>, <code>sku</code>, <code>stock</code>, <code>isActive</code>, <code>isFeatured</code>.</li>
+        <li>Save as <code>.csv</code> and upload it on the Import page.</li>
+        <li>Click <strong>Import Products</strong>. The page reports how many were created and lists any rows that failed (e.g. duplicate SKU).</li>
+      </ol>
+      <div class="callout note">
+        <span class="callout-title">📝 Note</span>
+        <p>CSV import creates products without images or variants — add those afterward by editing each product.</p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════ 5. ORDERS ════════════════════════ -->
+    <section class="guide-section" id="orders">
+      <div class="section-kicker">Section 5</div>
+      <h2 class="section-title"><span class="num">5</span>Orders <span class="path">/admin/orders</span></h2>
+      <p class="section-intro">
+        Every purchase made on the storefront appears here. This is your day-to-day
+        fulfillment screen.
+      </p>
+
+      <h3>Order statuses</h3>
+      <table>
+        <tr><th>Status</th><th>Meaning</th></tr>
+        <tr><td><span class="badge warning">PENDING</span></td><td>Order placed and paid, waiting for you to start processing.</td></tr>
+        <tr><td><span class="badge info">PROCESSING</span></td><td>You're preparing/packing the order.</td></tr>
+        <tr><td><span class="badge default">SHIPPED</span></td><td>Package handed to the carrier. Setting this status sends the customer a shipping email with tracking info.</td></tr>
+        <tr><td><span class="badge success">DELIVERED</span></td><td>Order has arrived with the customer.</td></tr>
+        <tr><td><span class="badge destructive">CANCELLED</span></td><td>Order cancelled before fulfillment.</td></tr>
+        <tr><td><span class="badge secondary">REFUNDED</span></td><td>Payment was refunded via Stripe.</td></tr>
+      </table>
+
+      <h3>Finding orders</h3>
+      <p>
+        Use the status tabs (<strong>All / Pending / Processing / Shipped / Delivered /
+        Cancelled / Refunded</strong>) to filter the list, or search by customer name, email,
+        or order number.
+      </p>
+
+      <h3>Order detail page</h3>
+      <p>Clicking an order shows:</p>
+      <ul>
+        <li><strong>Items</strong> — products, variants, quantities, and prices.</li>
+        <li><strong>Order summary</strong> — subtotal, discount (if a coupon was used), shipping, tax, and total.</li>
+        <li><strong>Customer</strong> — name, email, phone (or "Guest" + email for guest checkouts).</li>
+        <li><strong>Shipping Address</strong>.</li>
+        <li><strong>Tracking</strong> — shown once you've marked the order as shipped.</li>
+        <li><strong>Return Request</strong> — appears if the customer requested a return, with its status (Pending / Approved / Rejected).</li>
+      </ul>
+
+      <h3>Actions you can take</h3>
+      <h4>Update Status</h4>
+      <p>
+        Use the <strong>Update Status</strong> dropdown to move an order through
+        Pending → Processing → Shipped → Delivered (or to Cancelled).
+      </p>
+
+      <h4>Mark as Shipped</h4>
+      <ol class="steps">
+        <li>Choose <strong>SHIPPED</strong> from the Update Status menu.</li>
+        <li>A dialog opens — enter the <strong>Tracking Number</strong> and, if you have one, the <strong>Tracking URL</strong> (the carrier's tracking page).</li>
+        <li>Click <strong>Confirm Shipment</strong>. The customer automatically receives a "your order has shipped" email with this tracking info.</li>
+      </ol>
+
+      <h4>Issue Refund</h4>
+      <div class="callout danger">
+        <span class="callout-title">⚠️ This cannot be undone</span>
+        <p>
+          For paid orders, an <strong>Issue Refund</strong> button appears. Clicking it and
+          confirming will refund the <strong>full payment through Stripe</strong>, mark the
+          order as <strong>REFUNDED</strong>, and notify the customer by email. Use this for
+          cancellations or approved returns.
+        </p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════ 6. CUSTOMERS ════════════════════════ -->
+    <section class="guide-section" id="customers">
+      <div class="section-kicker">Section 6</div>
+      <h2 class="section-title"><span class="num">6</span>Customers <span class="path">/admin/customers</span></h2>
+      <p class="section-intro">
+        A directory of every registered customer, with their order history and lifetime spend.
+      </p>
+
+      <h3>The customer list shows</h3>
+      <ul>
+        <li><strong>Name &amp; email</strong> — search by either.</li>
+        <li><strong>Joined</strong> — registration date.</li>
+        <li><strong>Orders</strong> — number of orders placed.</li>
+        <li><strong>Total Spent</strong> — lifetime order value.</li>
+      </ul>
+
+      <h3>Customer detail page</h3>
+      <p>
+        Click the external-link icon (or a customer's name) to open their profile: contact
+        info, join date, total spend, and a full list of their orders (click any order to jump
+        to its detail page in Section 5).
+      </p>
+
+      <h3>Banning a customer</h3>
+      <p>
+        Click the <strong>ban icon</strong> next to a customer to ban them (e.g. for fraud or
+        abuse), or <strong>unban</strong> a previously banned account. Banned accounts show a
+        red "Banned" badge throughout the admin panel.
+      </p>
+    </section>
+
+    <!-- ════════════════════════ 7. CATEGORIES ════════════════════════ -->
+    <section class="guide-section" id="categories">
+      <div class="section-kicker">Section 7</div>
+      <h2 class="section-title"><span class="num">7</span>Categories <span class="path">/admin/categories</span></h2>
+      <p class="section-intro">
+        Categories control how products are organized in your navigation menu and category
+        pages. They support one level of sub-categories (e.g. <strong>Electronics</strong> →
+        <strong>Phones &amp; Tablets</strong>).
+      </p>
+
+      <h3>Your current category tree</h3>
+      <p>The store ships with 4 top-level categories, each with 6 sub-categories:</p>
+      <ul>
+        <li><strong>Electronics</strong> — Phones &amp; Tablets, Laptops &amp; Computers, Audio &amp; Headphones, Cameras &amp; Photography, Smart Home, Wearables</li>
+        <li><strong>Fashion</strong> — Women's Clothing, Men's Clothing, Shoes &amp; Boots, Bags &amp; Accessories, Jewelry &amp; Watches, Activewear</li>
+        <li><strong>Beauty</strong> — Skincare, Makeup, Haircare, Fragrance, Bath &amp; Body, Tools &amp; Brushes</li>
+        <li><strong>Toys</strong> — Action &amp; Adventure, Arts &amp; Crafts, Board Games, Educational, Outdoor Play, Baby &amp; Toddler</li>
+      </ul>
+
+      <h3>Adding / editing a category</h3>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Name *</div><div class="fdesc">Display name. Auto-generates the slug for new categories.</div></div>
+        <div class="field-card"><div class="fname">Slug</div><div class="fdesc">URL piece, e.g. <code>/categories/electronics</code>.</div></div>
+        <div class="field-card"><div class="fname">Parent Category</div><div class="fdesc">Leave as "Top level" for a main category, or pick a parent to make this a sub-category.</div></div>
+        <div class="field-card"><div class="fname">Description</div><div class="fdesc">Optional text shown on the category page.</div></div>
+        <div class="field-card"><div class="fname">Sort Order</div><div class="fdesc">Lower numbers appear first in menus.</div></div>
+        <div class="field-card"><div class="fname">Active</div><div class="fdesc">Off = "Draft" — hidden from the storefront.</div></div>
+        <div class="field-card"><div class="fname">Category Image</div><div class="fdesc">Optional banner/thumbnail image for the category page.</div></div>
+      </div>
+
+      <div class="callout warning">
+        <span class="callout-title">🗑️ Deleting categories</span>
+        <p>
+          Sub-categories must be deleted before their parent. If a category still has products
+          assigned, the confirmation dialog will warn you — the products themselves are not
+          deleted, only their link to that category.
+        </p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════ 8. COUPONS ════════════════════════ -->
+    <section class="guide-section" id="coupons">
+      <div class="section-kicker">Section 8</div>
+      <h2 class="section-title"><span class="num">8</span>Coupons &amp; Discounts <span class="path">/admin/coupons</span></h2>
+      <p class="section-intro">
+        Create promo codes customers can enter at checkout for a discount.
+      </p>
+
+      <h3>Fields</h3>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Code *</div><div class="fdesc">What customers type at checkout, e.g. <code>SUMMER25</code>. Always saved in capitals.</div></div>
+        <div class="field-card"><div class="fname">Type</div><div class="fdesc"><strong>Percentage</strong> (e.g. 15% off) or <strong>Fixed Amount</strong> (e.g. $10 off).</div></div>
+        <div class="field-card"><div class="fname">Value</div><div class="fdesc">The percentage or dollar amount.</div></div>
+        <div class="field-card"><div class="fname">Min Order ($)</div><div class="fdesc">Cart subtotal must reach this amount for the code to apply.</div></div>
+        <div class="field-card"><div class="fname">Max Uses</div><div class="fdesc">Total redemptions allowed across all customers. Leave blank for unlimited.</div></div>
+        <div class="field-card"><div class="fname">Expires At</div><div class="fdesc">Last date the code is valid.</div></div>
+        <div class="field-card"><div class="fname">Active</div><div class="fdesc">Turn off to pause a code without deleting it.</div></div>
+      </div>
+
+      <h3>Status badges</h3>
+      <table>
+        <tr><th>Badge</th><th>Meaning</th></tr>
+        <tr><td><span class="badge secondary">Inactive</span></td><td>Manually turned off — won't be accepted at checkout.</td></tr>
+        <tr><td><span class="badge destructive">Expired</span></td><td>Past its expiry date.</td></tr>
+        <tr><td><span class="badge warning">Exhausted</span></td><td>Reached its max-uses limit.</td></tr>
+      </table>
+
+      <h3>Starter coupons already in the system</h3>
+      <table>
+        <tr><th>Code</th><th>Discount</th><th>Conditions</th></tr>
+        <tr><td><code>WELCOME15</code></td><td>15% off</td><td>Min order $50 · up to 1,000 uses · expires Jan 1, 2027</td></tr>
+        <tr><td><code>SUMMER25</code></td><td>25% off</td><td>Min order $100 · up to 500 uses · expires Sep 1, 2026</td></tr>
+        <tr><td><code>FREESHIP</code></td><td>$9.99 off</td><td>Min order $40 · unlimited uses</td></tr>
+        <tr><td><code>VIP50</code></td><td>$50 off</td><td>Min order $200 · up to 100 uses</td></tr>
+      </table>
+    </section>
+
+    <!-- ════════════════════════ 9. BANNERS ════════════════════════ -->
+    <section class="guide-section" id="banners">
+      <div class="section-kicker">Section 9</div>
+      <h2 class="section-title"><span class="num">9</span>Homepage Banners <span class="path">/admin/banners</span></h2>
+      <p class="section-intro">
+        The large promotional images/carousel on your homepage are managed here.
+      </p>
+
+      <h3>Fields</h3>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Image *</div><div class="fdesc">Upload via Cloudinary. Recommended size: <strong>1920 × 800px</strong>.</div></div>
+        <div class="field-card"><div class="fname">Title *</div><div class="fdesc">Headline text overlaid on the banner.</div></div>
+        <div class="field-card"><div class="fname">Subtitle</div><div class="fdesc">Smaller supporting text.</div></div>
+        <div class="field-card"><div class="fname">Link URL</div><div class="fdesc">Where the banner sends customers when clicked, e.g. <code>/deals</code> or <code>/categories/electronics</code>.</div></div>
+        <div class="field-card"><div class="fname">Button Label</div><div class="fdesc">Call-to-action text, e.g. "Shop Now".</div></div>
+        <div class="field-card"><div class="fname">Start / End Date</div><div class="fdesc">Optional scheduling — the banner only appears live between these dates.</div></div>
+        <div class="field-card"><div class="fname">Sort Order</div><div class="fdesc">Controls the order banners appear in.</div></div>
+        <div class="field-card"><div class="fname">Active</div><div class="fdesc">Master on/off switch.</div></div>
+      </div>
+
+      <h3>Status badges</h3>
+      <table>
+        <tr><th>Badge</th><th>Meaning</th></tr>
+        <tr><td><span class="badge success">Live</span></td><td>Active and currently showing on the homepage.</td></tr>
+        <tr><td><span class="badge info">Scheduled</span></td><td>Active, but its start date hasn't arrived yet.</td></tr>
+        <tr><td><span class="badge destructive">Expired</span></td><td>Its end date has passed.</td></tr>
+        <tr><td><span class="badge secondary">Inactive</span></td><td>Manually turned off.</td></tr>
+      </table>
+    </section>
+
+    <!-- ════════════════════════ 10. BRAND AUTHORIZATIONS ════════════════════════ -->
+    <section class="guide-section" id="brand-auth">
+      <div class="section-kicker">Section 10</div>
+      <h2 class="section-title"><span class="num">10</span>Brand Authorizations <span class="path">/admin/brand-authorizations</span></h2>
+      <p class="section-intro">
+        This section powers your public <strong>"Authorized Reseller"</strong> page
+        (<code>/authorized-reseller</code>) — proof for customers (and brands) that you're a
+        legitimate, authorized seller of the brands you carry.
+      </p>
+
+      <h3>What's currently published</h3>
+      <table>
+        <tr><th>Brand</th><th>Type</th><th>Valid Until</th></tr>
+        <tr><td>Lenovo</td><td>Authorized Reseller</td><td>Jan 1, 2027</td></tr>
+        <tr><td>Yealink</td><td>Authorized Dealer</td><td>Dec 31, 2026</td></tr>
+        <tr><td>Fanvil</td><td>Authorized Reseller</td><td>Jun 30, 2027</td></tr>
+      </table>
+
+      <h3>Fields</h3>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Brand Logo *</div><div class="fdesc">Square logo image.</div></div>
+        <div class="field-card"><div class="fname">Certificate *</div><div class="fdesc">Upload the actual authorization certificate (image or PDF) — shown to customers as proof.</div></div>
+        <div class="field-card"><div class="fname">Brand Name *</div><div class="fdesc">e.g. "Lenovo".</div></div>
+        <div class="field-card"><div class="fname">Authorization Type *</div><div class="fdesc">e.g. "Authorized Reseller" or "Authorized Dealer".</div></div>
+        <div class="field-card"><div class="fname">Verification URL</div><div class="fdesc">Optional link to the brand's official partner directory where customers can verify you.</div></div>
+        <div class="field-card"><div class="fname">Verification Note</div><div class="fdesc">Internal note — e.g. instructions for finding you in the brand's directory.</div></div>
+        <div class="field-card"><div class="fname">Display Blurb</div><div class="fdesc">Short marketing text shown on the public page.</div></div>
+        <div class="field-card"><div class="fname">Valid From / Until</div><div class="fdesc">Certificate validity dates — drives the expiry alerts described below.</div></div>
+        <div class="field-card"><div class="fname">Published</div><div class="fdesc">Off = hidden from the public page (draft).</div></div>
+      </div>
+
+      <h3>Reordering</h3>
+      <p>Drag and drop entries by the grip handle to change the order they appear on the public page.</p>
+
+      <h3>Expiry alerts</h3>
+      <ul>
+        <li><span class="badge warning">⚠️ Expiring</span> — certificate expires within 30 days.</li>
+        <li><span class="badge destructive">⚠️ Expired</span> — past its valid-until date.</li>
+      </ul>
+      <p>Both also trigger the alert banner on the Dashboard (Section 3) so renewals don't get missed.</p>
+    </section>
+
+    <!-- ════════════════════════ 11. ANALYTICS ════════════════════════ -->
+    <section class="guide-section" id="analytics">
+      <div class="section-kicker">Section 11</div>
+      <h2 class="section-title"><span class="num">11</span>Analytics <span class="path">/admin/analytics</span></h2>
+      <p class="section-intro">
+        A deeper look at sales performance over the last 30 days (and 12 months for revenue).
+      </p>
+
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Total Orders (30d)</div><div class="fdesc">All orders placed in the last 30 days.</div></div>
+        <div class="field-card"><div class="fname">Registered Checkout %</div><div class="fdesc">Share of orders placed by signed-in customers vs. guests.</div></div>
+        <div class="field-card"><div class="fname">Guest Orders (30d)</div><div class="fdesc">Orders placed without an account.</div></div>
+        <div class="field-card"><div class="fname">Revenue Chart</div><div class="fdesc">Monthly revenue for the last 12 months.</div></div>
+        <div class="field-card"><div class="fname">Order Status Breakdown</div><div class="fdesc">How many orders are in each status (Pending, Shipped, etc.).</div></div>
+        <div class="field-card"><div class="fname">Top Products</div><div class="fdesc">Best sellers by revenue/units.</div></div>
+        <div class="field-card"><div class="fname">Top Categories</div><div class="fdesc">Which product categories drive the most sales.</div></div>
+        <div class="field-card"><div class="fname">Daily Revenue</div><div class="fdesc">Day-by-day revenue trend for the last 30 days.</div></div>
+      </div>
+      <div class="callout tip">
+        <span class="callout-title">💡 Tip</span>
+        <p>
+          A high <strong>Guest Orders</strong> share suggests customers don't see enough value
+          in creating an account — consider an account-only perk (saved addresses, faster
+          reorder) or a coupon for first-time registrations.
+        </p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════ 12. SETTINGS ════════════════════════ -->
+    <section class="guide-section" id="settings">
+      <div class="section-kicker">Section 12</div>
+      <h2 class="section-title"><span class="num">12</span>Store Settings <span class="path">/admin/settings</span></h2>
+      <p class="section-intro">
+        Store-wide configuration, split into two tabs: <strong>General</strong> and
+        <strong>AI Assistant</strong>.
+      </p>
+
+      <h3>General tab</h3>
+      <h4>Store Details</h4>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Store Name</div><div class="fdesc">Used in headers, emails, and page titles.</div></div>
+        <div class="field-card"><div class="fname">Currency</div><div class="fdesc">e.g. USD.</div></div>
+        <div class="field-card"><div class="fname">Support Email</div><div class="fdesc">Shown to customers for help requests.</div></div>
+      </div>
+
+      <h4>Tax Configuration</h4>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Default Tax Rate (%)</div><div class="fdesc">Applied at checkout, e.g. <code>8.875</code> for an 8.875% rate (NYC example).</div></div>
+      </div>
+
+      <h4>Shipping Rates</h4>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Free Shipping Threshold ($)</div><div class="fdesc">Orders at or above this subtotal ship free.</div></div>
+        <div class="field-card"><div class="fname">Standard Shipping ($)</div><div class="fdesc">Flat rate for standard delivery.</div></div>
+        <div class="field-card"><div class="fname">Express Shipping ($)</div><div class="fdesc">Flat rate for express delivery.</div></div>
+      </div>
+
+      <h4>Email Subject Lines</h4>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Order Confirmation Subject</div><div class="fdesc">Subject line of the email sent right after checkout.</div></div>
+        <div class="field-card"><div class="fname">Shipping Update Subject</div><div class="fdesc">Subject line of the "your order shipped" email.</div></div>
+      </div>
+      <div class="callout note">
+        <span class="callout-title">📨 Editing the email design</span>
+        <p>
+          These fields only control the subject lines. The full email designs (logo, colors,
+          body text) live in the codebase and require a developer to edit.
+        </p>
+      </div>
+
+      <h3>AI Assistant tab</h3>
+      <p>
+        This is where you turn the AI shopping assistant (Section 13) on or off and choose
+        which AI model it uses.
+      </p>
+      <div class="field-grid">
+        <div class="field-card"><div class="fname">Model</div><div class="fdesc">Pick which OpenAI model powers the chat assistant — affects cost and response quality.</div></div>
+        <div class="field-card"><div class="fname">OpenAI API Key</div><div class="fdesc">Paste your key from <code>platform.openai.com/api-keys</code>. Stored encrypted in the database, never shown in full again (masked display).</div></div>
+      </div>
+      <ul>
+        <li>A green <strong>"AI assistant is active"</strong> banner confirms it's working.</li>
+        <li>An amber banner means no key is set — the chat widget won't appear on the storefront.</li>
+        <li>Click the eye icon to reveal the masked key, or the trash icon to remove it (disables the assistant).</li>
+      </ul>
+    </section>
+
+    <!-- ════════════════════════ 13. AI ASSISTANT ════════════════════════ -->
+    <section class="guide-section" id="ai-assistant">
+      <div class="section-kicker">Section 13</div>
+      <h2 class="section-title"><span class="num">13</span>AI Shopping Assistant</h2>
+      <p class="section-intro">
+        A floating chat widget on the storefront that helps customers shop — like having a
+        knowledgeable sales associate available 24/7.
+      </p>
+
+      <h3>What it can do for customers</h3>
+      <table>
+        <tr><th>Category</th><th>Capability</th></tr>
+        <tr><td>Discovery</td><td>Search/recommend products, answer product questions, check if a brand is "Authorized Reseller", explain store policies (shipping, returns, etc.)</td></tr>
+        <tr><td>Cart</td><td>View cart, add/remove items, change quantities, clear the cart</td></tr>
+        <tr><td>Coupons</td><td>Apply a discount code to the cart</td></tr>
+        <tr><td>Checkout</td><td>Hand the customer a direct link to checkout</td></tr>
+        <tr><td>Orders</td><td>List past orders, check an order's status, request to cancel an order or start a return</td></tr>
+      </table>
+
+      <h3>Built-in safeguards</h3>
+      <ul>
+        <li><strong>Confirmation cards</strong> — for anything that changes the cart or an order (adding items, applying a coupon, cancelling an order, etc.), the assistant shows a card with the exact change and price impact. Nothing happens until the customer clicks <strong>Confirm</strong>.</li>
+        <li><strong>Sign-in required</strong> for cart/order actions — guests can browse and ask questions, but must be logged in to act on their cart or orders.</li>
+        <li><strong>Sanity limits</strong> — max 10 units per action, and a warning if a cart total exceeds $5,000.</li>
+        <li>The assistant is hidden on the admin panel, login pages, and checkout — it only appears for shoppers browsing the store.</li>
+      </ul>
+
+      <h3>Turning it on/off</h3>
+      <p>
+        Go to <strong>Admin → Settings → AI Assistant tab</strong> (Section 12) and add or
+        remove an OpenAI API key. No key = the widget doesn't appear at all, so there's no
+        cost or risk if you'd rather not offer it.
+      </p>
+    </section>
+
+    <!-- ════════════════════════ 14. STOREFRONT ════════════════════════ -->
+    <section class="guide-section" id="storefront">
+      <div class="section-kicker">Section 14</div>
+      <h2 class="section-title"><span class="num">14</span>The Storefront (Customer View)</h2>
+      <p class="section-intro">
+        A quick tour of what your customers experience — useful context for understanding the
+        admin sections above and for giving customers support.
+      </p>
+
+      <div class="sitemap">
+        <div><span class="route">/</span> <span class="desc">— Homepage: hero banners (Section 9), featured categories, featured products</span></div>
+        <div><span class="route">/products</span> <span class="desc">— All products, with filters (price, category, variant, in-stock) and sorting</span></div>
+        <div><span class="route">/categories/[name]</span> <span class="desc">— Same filterable listing, scoped to one category</span></div>
+        <div><span class="route">/products/[name]</span> <span class="desc">— Product page: photo gallery, variant picker, description, reviews, related products</span></div>
+        <div><span class="route">/search?q=...</span> <span class="desc">— Search results with autocomplete suggestions as you type</span></div>
+        <div class="indent1"><span class="desc">— Cart: a slide-out drawer (not a separate page), opened from the header cart icon</span></div>
+        <div><span class="route">/checkout</span> <span class="desc">— Address, shipping method, and secure payment via Stripe</span></div>
+        <div><span class="route">/order/[id]/confirmation</span> <span class="desc">— "Thank you" page after a successful order</span></div>
+        <div><span class="route">/account</span> <span class="desc">— Profile: name and phone (email cannot be changed)</span></div>
+        <div><span class="route">/orders</span> <span class="desc">— Order history for signed-in customers</span></div>
+        <div><span class="route">/orders/[id]</span> <span class="desc">— Order detail with an animated status timeline; cancel or request a return</span></div>
+        <div><span class="route">/authorized-reseller</span> <span class="desc">— Public brand authorization page (Section 10)</span></div>
+        <div><span class="route">/privacy · /terms · /shipping · /cookies · /accessibility</span> <span class="desc">— Legal &amp; policy pages</span></div>
+      </div>
+
+      <h3>Returns &amp; cancellations</h3>
+      <p>
+        From their order detail page, signed-in customers can request to <strong>cancel</strong>
+        an order (if it hasn't shipped) or <strong>request a return</strong>. These requests
+        appear on the corresponding order in <strong>Admin → Orders</strong> (Section 5) for
+        you to review and act on (e.g. issue a refund).
+      </p>
+
+      <h3>Cookie consent</h3>
+      <p>
+        First-time visitors see a cookie consent banner (GDPR/CCPA-style) at the bottom of the
+        screen, linking to the Cookie Policy page.
+      </p>
+    </section>
+
+    <!-- ════════════════════════ 15. SERVICES & CREDENTIALS ════════════════════════ -->
+    <section class="guide-section" id="services">
+      <div class="section-kicker">Section 15</div>
+      <h2 class="section-title"><span class="num">15</span>Services &amp; Credentials</h2>
+      <p class="section-intro">
+        UniFlex Global relies on a few outside services. Most are configured by your developer
+        on the hosting server and don't need day-to-day attention — this table is a reference
+        for what each one does and where to manage it if needed.
+      </p>
+
+      <table>
+        <tr><th>Service</th><th>Used for</th><th>Where it's managed</th></tr>
+        <tr>
+          <td><strong>Database (Neon / PostgreSQL)</strong></td>
+          <td>Stores all products, orders, customers, and settings.</td>
+          <td>Server configuration — developer-managed.</td>
+        </tr>
+        <tr>
+          <td><strong>Stripe</strong></td>
+          <td>Payment processing and refunds.</td>
+          <td>
+            <a href="https://dashboard.stripe.com" target="_blank" rel="noopener">dashboard.stripe.com</a>
+            for transaction history/disputes. API keys live in the server configuration —
+            ask your developer to switch from <em>test</em> to <em>live</em> keys before launch.
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Resend</strong></td>
+          <td>Transactional emails — verification, password reset, order confirmation, shipping updates.</td>
+          <td>
+            <a href="https://resend.com" target="_blank" rel="noopener">resend.com</a> dashboard
+            for delivery logs. API key in server configuration.
+          </td>
+        </tr>
+        <tr>
+          <td><strong>Cloudinary</strong></td>
+          <td>Hosts and optimizes every image you upload (products, banners, categories, certificates, logos).</td>
+          <td>
+            <a href="https://cloudinary.com/console" target="_blank" rel="noopener">cloudinary.com/console</a>
+            for storage usage. Uploads happen directly from the admin panel — no manual steps needed.
+          </td>
+        </tr>
+        <tr>
+          <td><strong>OpenAI</strong></td>
+          <td>Powers the AI shopping assistant (Section 13).</td>
+          <td>
+            <strong>Self-service:</strong> Admin → Settings → AI Assistant tab (Section 12).
+            Get a key at <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com/api-keys</a>.
+          </td>
+        </tr>
+      </table>
+
+      <div class="callout warning">
+        <span class="callout-title">🔑 About API keys</span>
+        <p>
+          Most of the keys above (Stripe, Resend, Cloudinary, the database connection) are
+          stored in a server configuration file that is <strong>not</strong> part of this guide
+          for security reasons — if a key is ever compromised, anyone holding it could access
+          payments, email, or customer data. If you need to view or rotate one of these keys,
+          ask your developer. The <strong>only</strong> key you can manage yourself day-to-day
+          is the OpenAI key for the AI assistant, via the Settings page.
+        </p>
+      </div>
+    </section>
+
+    <!-- ════════════════════════ 16. QUICK REFERENCE ════════════════════════ -->
+    <section class="guide-section" id="reference">
+      <div class="section-kicker">Section 16</div>
+      <h2 class="section-title"><span class="num">16</span>Quick Reference</h2>
+
+      <h3>"I want to..." → Where to go</h3>
+      <table>
+        <tr><th>Task</th><th>Go to</th></tr>
+        <tr><td>Add a new product</td><td>Admin → Products → <strong>Add Product</strong></td></tr>
+        <tr><td>Change a price or stock level</td><td>Admin → Products → click the product → edit Price/Stock → Save Changes</td></tr>
+        <tr><td>Process a new order</td><td>Admin → Orders → click the order → Update Status</td></tr>
+        <tr><td>Ship an order with tracking</td><td>Admin → Orders → order → Update Status → SHIPPED → enter tracking</td></tr>
+        <tr><td>Refund a customer</td><td>Admin → Orders → order → Issue Refund</td></tr>
+        <tr><td>Create a discount code</td><td>Admin → Coupons → Add Coupon</td></tr>
+        <tr><td>Update the homepage banner</td><td>Admin → Banners → Add/Edit Banner</td></tr>
+        <tr><td>Add/renew a brand certificate</td><td>Admin → Brand Auths → Add/Edit Brand</td></tr>
+        <tr><td>Check sales performance</td><td>Admin → Dashboard or Admin → Analytics</td></tr>
+        <tr><td>Update tax/shipping rates</td><td>Admin → Settings → General tab</td></tr>
+        <tr><td>Turn the AI assistant on/off</td><td>Admin → Settings → AI Assistant tab</td></tr>
+        <tr><td>Ban a problem customer</td><td>Admin → Customers → ban icon</td></tr>
+        <tr><td>Add/remove a category</td><td>Admin → Categories</td></tr>
+      </table>
+
+      <h3>Glossary</h3>
+      <table>
+        <tr><th>Term</th><th>Meaning</th></tr>
+        <tr><td>SKU</td><td>"Stock Keeping Unit" — your internal product code, used for inventory tracking.</td></tr>
+        <tr><td>Slug</td><td>The web-address-friendly version of a name, e.g. "ProBook Air 15" → <code>probook-air-15</code>.</td></tr>
+        <tr><td>Variant</td><td>A specific version of a product — e.g. "Color: Red" or "Size: Medium" — each with its own stock and optional price.</td></tr>
+        <tr><td>Compare At price</td><td>An "original" price shown crossed out next to a discounted price.</td></tr>
+        <tr><td>Guest order</td><td>An order placed by a customer who checked out without creating an account.</td></tr>
+        <tr><td>SUPER_ADMIN / ADMIN</td><td>Staff roles with full access to the admin panel (Section 2.5).</td></tr>
+      </table>
+
+      <div class="callout tip">
+        <span class="callout-title">🖨️ Saving this guide as a PDF</span>
+        <p>
+          Click <strong>"Print / Save as PDF"</strong> in the left-hand menu (or press
+          <code>Ctrl/Cmd + P</code>), then choose <strong>"Save as PDF"</strong> as the
+          destination. Each section starts on its own page for easy printing or sharing.
+        </p>
+      </div>
+    </section>
+
+    <div class="doc-footer">
+      UniFlex Global — Store Operations &amp; Admin Guide · Prepared June 10, 2026 · Confidential, internal use only
+    </div>
+
+  </main>
+</div>
+</body>
+</html>

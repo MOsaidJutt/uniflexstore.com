@@ -17,6 +17,7 @@ import {
   Gamepad2,
   Sun,
   Moon,
+  LayoutDashboard,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { categories } from '@/config/site'
@@ -101,7 +102,13 @@ function useFocusTrap(active: boolean, ref: React.RefObject<HTMLElement | null>)
 
 // ─── Header ──────────────────────────────────────────────────────────────────
 
-export function Header({ userButton }: { userButton?: React.ReactNode }) {
+export function Header({
+  userButton,
+  isAdmin = false,
+}: {
+  userButton?: React.ReactNode
+  isAdmin?: boolean
+}) {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
@@ -452,6 +459,15 @@ export function Header({ userButton }: { userButton?: React.ReactNode }) {
                     >
                       <User className="h-4 w-4" aria-hidden="true" /> My Account
                     </Link>
+                    {isAdmin && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-3 text-sm font-500 text-[var(--brand-accent)]"
+                      >
+                        <LayoutDashboard className="h-4 w-4" aria-hidden="true" /> Admin Panel
+                      </Link>
+                    )}
                     <Link
                       href="/deals"
                       onClick={() => setMobileOpen(false)}

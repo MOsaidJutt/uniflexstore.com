@@ -314,6 +314,21 @@ export const confirmCard: Variants = {
   },
 }
 
+// Cookie banner: slides up from off-screen so it's noticed, not just appears
+export const cookieBannerSlide: Variants = {
+  hidden: { y: '100%', opacity: 0 },
+  visible: {
+    y: 0,
+    opacity: 1,
+    transition: { type: 'spring', stiffness: 300, damping: 30 },
+  },
+  exit: {
+    y: '100%',
+    opacity: 0,
+    transition: { duration: 0.25, ease: [0.4, 0, 1, 1] },
+  },
+}
+
 // Tool activity pill: fades + slides in
 export const toolActivity: Variants = {
   hidden: { opacity: 0, y: 4 },

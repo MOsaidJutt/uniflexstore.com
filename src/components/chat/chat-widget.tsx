@@ -444,8 +444,12 @@ export function ChatWidget({ userId }: ChatWidgetProps) {
             role="dialog"
             aria-modal="true"
             aria-label="UniFlex Store chat assistant"
-            className="fixed bottom-[5.5rem] right-4 z-[450] flex w-[380px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] shadow-[0_20px_60px_-12px_rgba(10,21,32,0.4),0_0_0_1px_rgba(29,170,188,0.06)]"
-            style={{ height: 'min(600px, calc(100dvh - 8rem))', transformOrigin: 'bottom right' }}
+            className="fixed right-4 z-[450] flex w-[380px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-[var(--border-subtle)] bg-[var(--bg-base)] shadow-[0_20px_60px_-12px_rgba(10,21,32,0.4),0_0_0_1px_rgba(29,170,188,0.06)] transition-[bottom] duration-300"
+            style={{
+              bottom: 'calc(5.5rem + var(--cookie-banner-h, 0px))',
+              height: 'min(600px, calc(100dvh - 8rem))',
+              transformOrigin: 'bottom right',
+            }}
           >
             {/* Header */}
             <div className="flex shrink-0 items-center gap-3 border-b border-[var(--border-subtle)] bg-[var(--brand-primary)] px-4 py-3.5">
@@ -634,7 +638,8 @@ export function ChatWidget({ userId }: ChatWidgetProps) {
         aria-label={isOpen ? 'Close chat' : 'Open chat assistant'}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
-        className="fixed bottom-4 right-4 z-[450] flex h-14 w-14 items-center justify-center rounded-full bg-[var(--brand-primary)] text-white shadow-[0_4px_16px_-2px_rgba(10,21,32,0.35),0_0_0_0_color-mix(in_srgb,var(--brand-accent)_35%,transparent)] transition-all duration-300 hover:bg-[var(--brand-secondary)] hover:shadow-[0_8px_24px_-4px_rgba(10,21,32,0.4),0_0_0_4px_color-mix(in_srgb,var(--brand-accent)_20%,transparent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-accent)] focus-visible:ring-offset-2 active:scale-95"
+        className="fixed right-4 z-[450] flex h-14 w-14 items-center justify-center rounded-full bg-[var(--brand-primary)] text-white shadow-[0_4px_16px_-2px_rgba(10,21,32,0.35),0_0_0_0_color-mix(in_srgb,var(--brand-accent)_35%,transparent)] transition-all duration-300 hover:bg-[var(--brand-secondary)] hover:shadow-[0_8px_24px_-4px_rgba(10,21,32,0.4),0_0_0_4px_color-mix(in_srgb,var(--brand-accent)_20%,transparent)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-accent)] focus-visible:ring-offset-2 active:scale-95"
+        style={{ bottom: 'calc(1rem + var(--cookie-banner-h, 0px))' }}
       >
         <AnimatePresence mode="wait" initial={false}>
           {isOpen ? (

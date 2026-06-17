@@ -10,10 +10,11 @@ export default async function MainLayout({ children }: { children: React.ReactNo
   const session = await getSession()
   const userId = session?.user?.id ?? null
   const initialItems = userId ? await getCartDB(userId) : []
+  const isAdmin = session?.user?.role === 'ADMIN'
 
   return (
     <CartProvider userId={userId} initialItems={initialItems}>
-      <Header userButton={<UserButton />} />
+      <Header userButton={<UserButton />} isAdmin={isAdmin} />
       <main id="main-content" className="flex-1" tabIndex={-1}>
         {children}
       </main>

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { LogOut } from 'lucide-react'
+import { LogOut, LayoutDashboard } from 'lucide-react'
 import { auth } from '@/auth'
 import { logoutAction } from '@/server/actions/auth'
 
@@ -29,6 +29,17 @@ export async function UserButton() {
 
   return (
     <div className="hidden items-center gap-1 sm:flex">
+      {user.role === 'ADMIN' && (
+        <Link
+          href="/admin"
+          aria-label="Admin panel"
+          title="Admin panel"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-[var(--text-muted)] transition-colors hover:bg-[var(--bg-subtle)] hover:text-[var(--brand-accent)]"
+        >
+          <LayoutDashboard className="h-4 w-4" aria-hidden="true" />
+        </Link>
+      )}
+
       <Link
         href="/account"
         aria-label="My account"

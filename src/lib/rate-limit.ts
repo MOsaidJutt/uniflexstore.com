@@ -74,3 +74,9 @@ export async function checkActionRate(): Promise<boolean> {
   const ip = await getIp()
   return check(`action:${ip}`, 20, 5 * 60 * 1000)
 }
+
+/** 5 logistics lead submissions per hour per IP */
+export async function checkLogisticsLeadRate(): Promise<boolean> {
+  const ip = await getIp()
+  return check(`logistics-lead:${ip}`, 5, 60 * 60 * 1000)
+}

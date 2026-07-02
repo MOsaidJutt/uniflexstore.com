@@ -23,6 +23,9 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'www.yealink.com' },
       // Certificate placeholders (dev only)
       { protocol: 'https', hostname: 'placehold.co' },
+      // Logistics landing page — placeholder photography (swap for real fleet photos)
+      { protocol: 'https', hostname: 'picsum.photos' },
+      { protocol: 'https', hostname: 'fastly.picsum.photos' },
     ],
   },
 
@@ -54,7 +57,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               // OAuth avatar hostnames + Stripe receipt images
-              "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://platform-lookaside.fbsbx.com https://q.stripe.com https://upload.wikimedia.org https://www.fanvil.com https://www.yealink.com https://placehold.co",
+              "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://lh3.googleusercontent.com https://avatars.githubusercontent.com https://platform-lookaside.fbsbx.com https://q.stripe.com https://upload.wikimedia.org https://www.fanvil.com https://www.yealink.com https://placehold.co https://picsum.photos https://fastly.picsum.photos",
               "connect-src 'self' https://api.stripe.com",
               "frame-src https://js.stripe.com https://hooks.stripe.com",
               "frame-ancestors 'none'",

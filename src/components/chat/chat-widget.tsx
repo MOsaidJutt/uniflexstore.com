@@ -41,7 +41,7 @@ interface ChatWidgetProps {
 
 // ─── Hidden routes ────────────────────────────────────────────────────────────
 
-const HIDDEN_PREFIXES = ['/admin', '/auth', '/checkout']
+const HIDDEN_PREFIXES = ['/admin', '/auth', '/checkout', '/logistics']
 
 function useShowWidget(pathname: string): boolean {
   return !HIDDEN_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))
